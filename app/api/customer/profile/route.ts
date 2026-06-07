@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { createHash } from "crypto";
 
-function getCustomerId(req: NextRequest): string | null {
+async function getCustomerId(req: NextRequest): string | null {
   const db = getDb();
   const token = req.cookies.get("customer_session")?.value;
   if (!token) return null;
-  const sess = db.prepare("SELECT customer_id FROM sessions WHERE token=? AND expires > datetime('now')").get(token) as {customer_id:string}|undefined;
+  const sess = (await db.execute({ sql: "SELECT customer_id FROM sessions WHERE token=? AND expires > datetime('now')", args: [token] })).rows[0] as {customer_id:string}|undefined;
   return sess?.customer_id ?? null;
 }
 
@@ -16,9 +16,7 @@ export async function GET(req: NextRequest) {
     const customerId = getCustomerId(req);
     if (!customerId) return NextResponse.json({ profile: null });
 
-    const profile = db.prepare(
-      "SELECT id,email,first_name,last_name,phone,country,status,tier,loyalty_pts,total_orders,total_spend FROM customers WHERE id=?"
-    ).get(customerId);
+    const profile = (await db.execute({ sql: "SELECT id,email,first_name,last_name,phone,country,status,tier,loyalty_pts,total_orders,total_spend FROM customers WHERE id=?", args: [customerId] })).rows[0];
 
     return NextResponse.json({ profile });
   } catch (e) {
@@ -48,7 +46,7 @@ export async function PATCH(req: NextRequest) {
 
     if (updates.length) {
       values.push(customerId);
-      db.prepare(`UPDATE customers SET ${updates.join(",")} WHERE id=?`).run(...values);
+      await db.execute({ sql: `UPDATE customers SET ${updates.join(",")} WHERE id=?`, args: [...values] });
     }
 
     return NextResponse.json({ ok: true });

@@ -15,8 +15,8 @@ export async function GET(req: NextRequest) {
     if (email) { where.push("customer_email = ?"); params.push(email); }
 
     const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
-    const orders = db.prepare(`SELECT * FROM orders ${whereSql} ORDER BY created_at DESC LIMIT ?`).all(...params, limit);
-    const total  = (db.prepare(`SELECT COUNT(*) as c FROM orders ${whereSql}`).get(...params) as { c: number }).c;
+    const orders = (await db.execute({ sql: `SELECT * FROM orders ${whereSql} ORDER BY created_at DESC LIMIT ?`, args: [...params, limit] })).rows;
+    const total  = ((await db.execute({ sql: `SELECT COUNT(*) as c FROM orders ${whereSql}`, args: [...params] })).rows[0] as { c: number }).c;
     return NextResponse.json({ orders, total });
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 });
@@ -37,18 +37,10 @@ export async function POST(req: NextRequest) {
     const shipAddr = typeof addr === "string" ? addr : JSON.stringify(addr);
     const items = Array.isArray(body.items) ? body.items : [];
 
-    db.prepare(`
+    await db.execute({ sql: `
       INSERT INTO orders (id,order_number,customer_name,customer_email,status,payment_status,subtotal,shipping,tax,discount,total,items,shipping_address,shipping_method)
       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-    `).run(
-      id, num, name, email,
-      body.status ?? "pending",
-      body.payment_method ? "paid" : "pending",
-      body.subtotal ?? 0, body.shipping ?? 0, body.tax ?? 0, body.discount ?? 0,
-      body.total ?? 0,
-      JSON.stringify(items), shipAddr,
-      body.shipping_method ?? body.shippingMethod ?? "standard"
-    );
+    `, args: [id, num, name, email, body.status ?? "pending", body.payment_method ? "paid" : "pending", body.subtotal ?? 0, body.shipping ?? 0, body.tax ?? 0, body.discount ?? 0, body.total ?? 0, JSON.stringify(items), shipAddr, body.shipping_method ?? body.shippingMethod ?? "standard"] });
 
     return NextResponse.json({ ok: true, id, orderNumber: num }, { status: 201 });
   } catch (e) {

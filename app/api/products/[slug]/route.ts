@@ -5,7 +5,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
   try {
     const { slug } = await params;
     const db = getDb();
-    db.prepare("UPDATE products SET status='deleted' WHERE slug=?").run(slug);
+    await db.execute({ sql: "UPDATE products SET status='deleted' WHERE slug=?", args: [slug] });
     return NextResponse.json({ ok: true });
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 });
@@ -16,7 +16,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ slu
   try {
     const { slug } = await params;
     const db = getDb();
-    const product = db.prepare("SELECT * FROM products WHERE slug = ?").get(slug);
+    const product = (await db.execute({ sql: "SELECT * FROM products WHERE slug = ?", args: [slug] })).rows[0];
     if (!product) return NextResponse.json({ error: "Not found" }, { status: 404 });
     return NextResponse.json(product);
   } catch (e) {
@@ -56,7 +56,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ sl
 
     const sets = keys.map(k => `${k} = ?`).join(", ");
     const vals = [...keys.map(k => map[k]), slug];
-    db.prepare(`UPDATE products SET ${sets} WHERE slug = ?`).run(...vals);
+    await db.execute({ sql: `UPDATE products SET ${sets} WHERE slug = ?`, args: [...vals] });
     return NextResponse.json({ ok: true });
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 });

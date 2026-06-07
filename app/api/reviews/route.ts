@@ -12,13 +12,13 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ reviews: [] });
     }
 
-    const reviews = db.prepare(`
+    const reviews = (await db.execute({ sql: `
       SELECT r.id, r.rating, r.title, r.comment, r.created_at, c.first_name, c.last_name
       FROM reviews r
       JOIN customers c ON r.customer_id = c.id
       WHERE r.product_id=? AND r.status='approved'
       ORDER BY r.created_at DESC
-    `).all(productId);
+    `, args: [productId] })).rows;
 
     return NextResponse.json({ reviews });
   } catch (e) {
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: "Not logged in" }, { status: 401 });
     }
 
-    const sess = db.prepare("SELECT customer_id FROM sessions WHERE token=? AND expires > datetime('now')").get(token) as {customer_id:string}|undefined;
+    const sess = (await db.execute({ sql: "SELECT customer_id FROM sessions WHERE token=? AND expires > datetime('now')", args: [token] })).rows[0] as {customer_id:string}|undefined;
     const customerId = sess?.customer_id;
     if (!customerId) {
       return NextResponse.json({ ok: false, error: "Session expired" }, { status: 401 });
@@ -46,15 +46,13 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if customer already reviewed this product
-    const existing = db.prepare("SELECT id FROM reviews WHERE product_id=? AND customer_id=?").get(productId, customerId);
+    const existing = (await db.execute({ sql: "SELECT id FROM reviews WHERE product_id=? AND customer_id=?", args: [productId, customerId] })).rows[0];
     if (existing) {
       return NextResponse.json({ ok: false, error: "You already reviewed this product" }, { status: 400 });
     }
 
     const id = randomUUID();
-    db.prepare(
-      "INSERT INTO reviews (id,product_id,customer_id,rating,title,comment,status) VALUES (?,?,?,?,?,?,?)"
-    ).run(id, productId, customerId, rating, title||"", comment||"", "pending");
+    await db.execute({ sql: "INSERT INTO reviews (id,product_id,customer_id,rating,title,comment,status) VALUES (?,?,?,?,?,?,?)", args: [id, productId, customerId, rating, title||"", comment||"", "pending"] });
 
     return NextResponse.json({ ok: true, id });
   } catch (e) {

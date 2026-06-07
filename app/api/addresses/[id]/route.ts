@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 
-function getCustomerId(req: NextRequest): string | null {
+async function getCustomerId(req: NextRequest): string | null {
   const db = getDb();
   const token = req.cookies.get("customer_session")?.value;
   if (!token) return null;
-  const sess = db.prepare("SELECT customer_id FROM sessions WHERE token=? AND expires > datetime('now')").get(token) as {customer_id:string}|undefined;
+  const sess = (await db.execute({ sql: "SELECT customer_id FROM sessions WHERE token=? AND expires > datetime('now')", args: [token] })).rows[0] as {customer_id:string}|undefined;
   return sess?.customer_id ?? null;
 }
 
@@ -17,7 +17,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     if (!customerId) return NextResponse.json({ ok: false, error: "Not logged in" }, { status: 401 });
 
     // Verify ownership
-    const addr = db.prepare("SELECT customer_id FROM addresses WHERE id=?").get(id) as {customer_id:string}|undefined;
+    const addr = (await db.execute({ sql: "SELECT customer_id FROM addresses WHERE id=?", args: [id] })).rows[0] as {customer_id:string}|undefined;
     if (!addr || addr.customer_id !== customerId) {
       return NextResponse.json({ ok: false, error: "Not found" }, { status: 404 });
     }
@@ -25,7 +25,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const { name, street, city, state, zip, country, phone, isDefault } = await req.json();
 
     if (isDefault) {
-      db.prepare("UPDATE addresses SET is_default=0 WHERE customer_id=?").run(customerId);
+      await db.execute({ sql: "UPDATE addresses SET is_default=0 WHERE customer_id=?", args: [customerId] });
     }
 
     const updates: string[] = [];
@@ -41,7 +41,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     if (updates.length) {
       values.push(id);
-      db.prepare(`UPDATE addresses SET ${updates.join(",")} WHERE id=?`).run(...values);
+      await db.execute({ sql: `UPDATE addresses SET ${updates.join(",")} WHERE id=?`, args: [...values] });
     }
 
     return NextResponse.json({ ok: true });
@@ -58,12 +58,12 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     if (!customerId) return NextResponse.json({ ok: false, error: "Not logged in" }, { status: 401 });
 
     // Verify ownership
-    const addr = db.prepare("SELECT customer_id FROM addresses WHERE id=?").get(id) as {customer_id:string}|undefined;
+    const addr = (await db.execute({ sql: "SELECT customer_id FROM addresses WHERE id=?", args: [id] })).rows[0] as {customer_id:string}|undefined;
     if (!addr || addr.customer_id !== customerId) {
       return NextResponse.json({ ok: false, error: "Not found" }, { status: 404 });
     }
 
-    db.prepare("DELETE FROM addresses WHERE id=?").run(id);
+    await db.execute({ sql: "DELETE FROM addresses WHERE id=?", args: [id] });
     return NextResponse.json({ ok: true });
   } catch (e) {
     return NextResponse.json({ ok: false, error: String(e) }, { status: 500 });

@@ -17,8 +17,8 @@ export async function GET(req: NextRequest) {
     sql += " ORDER BY created_at DESC LIMIT ?";
     params.push(limit);
 
-    const customers = db.prepare(sql).all(...params);
-    const total = (db.prepare("SELECT COUNT(*) as c FROM customers").get() as { c: number }).c;
+    const customers = (await db.execute({ sql: sql, args: [...params] })).rows;
+    const total = ((await db.execute("SELECT COUNT(*) as c FROM customers")).rows[0] as { c: number }).c;
     return NextResponse.json({ customers, total });
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 });

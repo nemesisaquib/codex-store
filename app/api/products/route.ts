@@ -45,8 +45,8 @@ export async function GET(req: NextRequest) {
     const sql      = `SELECT * FROM products ${whereSql} ORDER BY ${orderBy} LIMIT ? OFFSET ?`;
     const countSql = `SELECT COUNT(*) as c FROM products ${whereSql}`;
 
-    const products = db.prepare(sql).all(...params, limit, offset);
-    const total    = (db.prepare(countSql).get(...params) as { c: number }).c;
+    const products = (await db.execute({ sql: sql, args: [...params, limit, offset] })).rows;
+    const total    = ((await db.execute({ sql: countSql, args: [...params] })).rows[0] as { c: number }).c;
 
     return NextResponse.json({ products, total });
   } catch (e) {
@@ -64,17 +64,10 @@ export async function POST(req: NextRequest) {
       .replace(/\s+/g, "-")
       .replace(/[^a-z0-9-]/g, "");
 
-    db.prepare(`
+    await db.execute({ sql: `
       INSERT INTO products (id,name,slug,brand,category,price,compare_price,color,image_url,image_url2,gallery,stock,badge,is_new,rating,reviews,colors,status)
       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-    `).run(
-      id, body.name, slug, body.brand, body.category,
-      body.price, body.comparePrice ?? null, body.color ?? null,
-      body.image_url ?? null, body.image_url2 ?? null, body.gallery ?? "[]",
-      body.stock ?? 100, body.badge ?? null, body.isNew ? 1 : 0,
-      body.rating ?? 4.5, body.reviews ?? 0,
-      JSON.stringify(body.colors ?? []), body.status ?? "active"
-    );
+    `, args: [id, body.name, slug, body.brand, body.category, body.price, body.comparePrice ?? null, body.color ?? null, body.image_url ?? null, body.image_url2 ?? null, body.gallery ?? "[]", body.stock ?? 100, body.badge ?? null, body.isNew ? 1 : 0, body.rating ?? 4.5, body.reviews ?? 0, JSON.stringify(body.colors ?? []), body.status ?? "active"] });
 
     return NextResponse.json({ id, slug }, { status: 201 });
   } catch (e) {

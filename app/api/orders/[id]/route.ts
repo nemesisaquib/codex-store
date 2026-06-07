@@ -5,7 +5,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{id:s
   try {
     const { id } = await params;
     const db = getDb();
-    const order = db.prepare("SELECT * FROM orders WHERE id=? OR order_number=?").get(id, id);
+    const order = (await db.execute({ sql: "SELECT * FROM orders WHERE id=? OR order_number=?", args: [id, id] })).rows[0];
     if (!order) return NextResponse.json({ error: "Not found" }, { status: 404 });
     return NextResponse.json(order);
   } catch (e) {
@@ -22,7 +22,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{id:
     const updates = Object.keys(body).filter(k => allowed.includes(k));
     if (!updates.length) return NextResponse.json({ error: "No valid fields" }, { status: 400 });
     const sql = `UPDATE orders SET ${updates.map(k=>`${k}=?`).join(",")} , updated_at=datetime('now') WHERE id=? OR order_number=?`;
-    db.prepare(sql).run(...updates.map(k => body[k]), id, id);
+    await db.execute({ sql: sql, args: [...updates.map(k => body[k]), id, id] });
     return NextResponse.json({ ok: true });
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 });

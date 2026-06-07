@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
     }
 
     const db = getDb();
-    const customer = db.prepare("SELECT id,first_name FROM customers WHERE email=?").get(email) as {id:string;first_name:string}|undefined;
+    const customer = (await db.execute({ sql: "SELECT id,first_name FROM customers WHERE email=?", args: [email] })).rows[0] as {id:string;first_name:string}|undefined;
 
     // Always return ok — don't reveal if email exists (security)
     if (!customer) {
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     // Create reset token — 15 min expiry
     const token = randomUUID();
     const expires = new Date(Date.now() + 15 * 60 * 1000).toISOString();
-    db.prepare("INSERT INTO reset_tokens (token,customer_id,expires) VALUES (?,?,?)").run(token, customer.id, expires);
+    await db.execute({ sql: "INSERT INTO reset_tokens (token,customer_id,expires) VALUES (?,?,?)", args: [token, customer.id, expires] });
 
     // Send email if SMTP configured
     if (getSmtpConfig()) {

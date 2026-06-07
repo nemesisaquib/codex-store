@@ -4,7 +4,7 @@ import { getDb } from "@/lib/db";
 export async function GET() {
   try {
     const db = getDb();
-    const rows = db.prepare("SELECT * FROM settings ORDER BY group_name, key").all() as {key:string;value:string;group_name:string}[];
+    const rows = (await db.execute("SELECT * FROM settings ORDER BY group_name, key")).rows as {key:string;value:string;group_name:string}[];
     const grouped: Record<string, Record<string,string>> = {};
     for (const r of rows) {
       if (!grouped[r.group_name]) grouped[r.group_name] = {};

@@ -14,6 +14,7 @@ files.forEach(sourceFile => {
   const callExpressions = sourceFile.getDescendantsOfKind(SyntaxKind.CallExpression);
   
   callExpressions.forEach(callExpr => {
+    if (callExpr.wasForgotten()) return;
     const expr = callExpr.getExpression();
     
     if (expr.getKind() === SyntaxKind.PropertyAccessExpression) {
