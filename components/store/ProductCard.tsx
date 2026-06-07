@@ -205,6 +205,7 @@ export default function ProductCard({ product }: { product: Product }) {
           image_url2: product.image2,
           compare_price: product.comparePrice,
           colors: product.colors_str || JSON.stringify(product.colors || []),
+          stock: product.stock ?? 0,
         }}
         open={quickViewOpen}
         onClose={() => setQuickViewOpen(false)}
