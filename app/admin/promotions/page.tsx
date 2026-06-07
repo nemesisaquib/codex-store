@@ -17,7 +17,7 @@ export default function AdminPromotionsPage() {
   const [copied,   setCopied]  = useState("");
 
   const load = () => fetch("/api/promotions").then(r=>r.json()).then(d=>setPromos(d.promotions??[]));
-  useEffect(load,[]);
+  useEffect(() => { load(); }, []);
 
   const toggle = async (p: Promo) => {
     await fetch(`/api/promotions/${p.id}`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({is_active:p.is_active?0:1})});
