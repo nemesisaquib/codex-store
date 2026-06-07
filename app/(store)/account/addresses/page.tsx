@@ -43,7 +43,7 @@ export default function AddressesPage() {
       {modal && (
         <div className="mb-6 p-4 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-2xl space-y-3">
           {[{k:"name",l:"Name"},{k:"street",l:"Street"},{k:"city",l:"City"},{k:"state",l:"State"},{k:"zip",l:"Zip"},{k:"phone",l:"Phone"}].map(({k,l})=>(
-            <input key={k} type="text" value={(form as Record<string,string>)[k]} onChange={e=>setForm(p=>({...p,[k]:e.target.value}))} placeholder={l} className="w-full px-3 py-2 border border-neutral-200 dark:border-neutral-700 rounded-lg text-sm bg-white dark:bg-neutral-800 focus:outline-none focus:border-[#e02020]"/>
+            <input key={k} type="text" value={(form as any)[k]} onChange={e=>setForm(p=>({...p,[k]:e.target.value}))} placeholder={l} className="w-full px-3 py-2 border border-neutral-200 dark:border-neutral-700 rounded-lg text-sm bg-white dark:bg-neutral-800 focus:outline-none focus:border-[#e02020]"/>
           ))}
           <select value={form.country} onChange={e=>setForm(p=>({...p,country:e.target.value}))} className="w-full px-3 py-2 border border-neutral-200 dark:border-neutral-700 rounded-lg text-sm bg-white dark:bg-neutral-800 focus:outline-none focus:border-[#e02020]">
             <option>United States</option><option>United Kingdom</option><option>Canada</option>
