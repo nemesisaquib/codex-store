@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { randomUUID } from "crypto";
 
-async function getCustomerId(req: NextRequest): string | null {
+async function getCustomerId(req: NextRequest): Promise<string | null> {
   const db = getDb();
   const token = req.cookies.get("customer_session")?.value;
   if (!token) return null;
