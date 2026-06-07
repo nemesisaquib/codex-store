@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle, Package, Truck, Mail, ArrowRight, Package2 } from "lucide-react";
@@ -13,7 +13,7 @@ interface Order {
   status: string;
 }
 
-export default function CheckoutSuccessPage() {
+function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
   const orderNum = searchParams.get("order");
   const [order, setOrder] = useState<Order | null>(null);
@@ -130,5 +130,13 @@ export default function CheckoutSuccessPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CheckoutSuccessPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 flex items-center justify-center text-neutral-400">Loading order…</div>}>
+      <CheckoutSuccessContent />
+    </Suspense>
   );
 }
