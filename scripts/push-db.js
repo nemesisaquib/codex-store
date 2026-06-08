@@ -4,13 +4,16 @@ const { createClient } = require('@libsql/client');
 // Manually load the tokens from .env.local without needing dotenv package
 const fs = require('fs');
 const env = fs.readFileSync('.env.local', 'utf8');
-const tursoUrl = env.match(/TURSO_DATABASE_URL="?([^"\n]+)"?/)?.[1];
-const tursoToken = env.match(/TURSO_AUTH_TOKEN="?([^"\n]+)"?/)?.[1];
+const tursoUrlRaw = env.match(/TURSO_DATABASE_URL="?([^"\n\r]+)"?/)?.[1];
+const tursoToken = env.match(/TURSO_AUTH_TOKEN="?([^"\n\r]+)"?/)?.[1];
 
-if (!tursoUrl || !tursoToken) {
+if (!tursoUrlRaw || !tursoToken) {
   console.error("Could not find Turso credentials in .env.local");
   process.exit(1);
 }
+
+const tursoUrl = tursoUrlRaw.replace('libsql://', 'https://');
+console.log("Connecting to:", tursoUrl);
 
 async function push() {
   console.log("Connecting to local database...");
