@@ -136,22 +136,48 @@ export default function CloudinaryUpload({ mode = "single", value, onChange, lab
         </p>
       )}
 
-      {/* Previews — small gallery thumbnails */}
+      {/* Previews — gallery grid */}
       {images.length > 0 && (
-        <div className="mt-3 flex flex-wrap gap-2">
+        <div className={`mt-3 ${mode === "multiple" ? "grid grid-cols-4 sm:grid-cols-6 gap-2" : "flex gap-3"}`}>
           {images.map((url, i) => (
-            <div key={i} className="relative group w-[72px] h-[90px] rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 flex-shrink-0">
-              <img src={url} alt="" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = "none"; }} />
+            <div
+              key={i}
+              className={`relative group overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 ${
+                mode === "single" ? "w-[120px] h-[150px] flex-shrink-0" : "aspect-[4/5]"
+              }`}
+            >
+              <img
+                src={url}
+                alt=""
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                onError={(e) => { e.currentTarget.style.display = "none"; }}
+              />
+              {/* Dark overlay on hover */}
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-200 rounded-xl" />
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); removeImage(i); }}
-                className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#e02020]"
+                className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-black/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-[#e02020] hover:scale-110"
               >
-                <X size={11} />
+                <X size={12} />
               </button>
-              {mode === "multiple" && <span className="absolute bottom-0.5 left-0.5 text-[8px] font-bold bg-black/60 text-white px-1 py-0.5 rounded leading-none">{i + 1}</span>}
+              {mode === "multiple" && (
+                <span className="absolute bottom-1.5 left-1.5 text-[9px] font-bold bg-black/70 text-white px-1.5 py-0.5 rounded-full leading-none">
+                  {i + 1}
+                </span>
+              )}
             </div>
           ))}
+          {/* Add more slot for multiple mode */}
+          {mode === "multiple" && (
+            <div
+              onClick={() => !uploading && inputRef.current?.click()}
+              className="aspect-[4/5] rounded-xl border-2 border-dashed border-neutral-300 dark:border-neutral-700 flex flex-col items-center justify-center gap-1 cursor-pointer hover:border-[#e02020] hover:bg-[#e02020]/5 transition-colors group"
+            >
+              <span className="text-2xl text-neutral-300 group-hover:text-[#e02020] transition-colors leading-none">+</span>
+              <span className="text-[9px] text-neutral-400 group-hover:text-[#e02020] transition-colors font-medium">Add</span>
+            </div>
+          )}
         </div>
       )}
     </div>

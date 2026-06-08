@@ -119,7 +119,7 @@ export default function AdminOrdersPage() {
       {selected && (
         <div className="fixed inset-0 z-50 flex">
           <div className="flex-1 bg-black/40 backdrop-blur-sm" onClick={()=>setSelected(null)}/>
-          <div className="w-full max-w-xl bg-white dark:bg-neutral-900 shadow-2xl overflow-y-auto">
+          <div style={{maxWidth:"1140px"}} className="w-full bg-white dark:bg-neutral-900 shadow-2xl overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b border-neutral-200 dark:border-neutral-800 sticky top-0 bg-white dark:bg-neutral-900 z-10">
               <div>
                 <h2 className="font-semibold text-neutral-900 dark:text-white">{selected.order_number}</h2>

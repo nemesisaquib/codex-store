@@ -117,7 +117,7 @@ export default function AdminCustomersPage() {
       {selected && (
         <div className="fixed inset-0 z-50 flex">
           <div className="flex-1 bg-black/40 backdrop-blur-sm" onClick={()=>setSelected(null)}/>
-          <div className="w-full max-w-md bg-white dark:bg-neutral-900 shadow-2xl overflow-y-auto">
+          <div style={{maxWidth:"1140px"}} className="w-full bg-white dark:bg-neutral-900 shadow-2xl overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b border-neutral-200 dark:border-neutral-800 sticky top-0 bg-white dark:bg-neutral-900 z-10">
               <h2 className="font-semibold text-neutral-900 dark:text-white">Customer Profile</h2>
               <button onClick={()=>setSelected(null)} className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-xl"><X size={18}/></button>
