@@ -50,24 +50,23 @@ async function push() {
     
     console.log(`Uploading ${rows.length} rows to ${table.name}...`);
     
-    // Upload rows one by one to avoid massive batch size limits
-    let successCount = 0;
-    for (const row of rows) {
+    // Upload rows in a single batch to avoid network spam and 400 errors
+    const batchStmts = rows.map(row => {
       const columns = Object.keys(row);
       const values = Object.values(row);
       const placeholders = columns.map(() => '?').join(',');
-      
-      try {
-        await remoteDb.execute({
-          sql: `INSERT OR IGNORE INTO ${table.name} (${columns.join(',')}) VALUES (${placeholders})`,
-          args: values
-        });
-        successCount++;
-      } catch (e) {
-        console.error(`Error inserting row into ${table.name}:`, e.message);
-      }
+      return {
+        sql: `INSERT OR IGNORE INTO ${table.name} (${columns.join(',')}) VALUES (${placeholders})`,
+        args: values
+      };
+    });
+    
+    try {
+      await remoteDb.batch(batchStmts, "write");
+      console.log(`Successfully uploaded ${rows.length}/${rows.length} rows to ${table.name}.`);
+    } catch (e) {
+      console.error(`Error inserting batch into ${table.name}:`, e.message);
     }
-    console.log(`Successfully uploaded ${successCount}/${rows.length} rows to ${table.name}.`);
   }
   
   console.log("\n🎉 Database fully migrated to Turso!");
