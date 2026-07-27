@@ -64,7 +64,7 @@ export default function ProductCard({ product }: { product: Product }) {
               alt={product.name}
               loading="lazy"
               onError={(e) => { e.currentTarget.style.display = "none"; }}
-              className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ${hovered && product.image2 ? "opacity-0" : "opacity-100"} group-hover:scale-105`}
+              className={`absolute inset-0 w-full h-full object-contain p-4 transition-all duration-500 ${hovered && product.image2 ? "opacity-0" : "opacity-100"} group-hover:scale-105`}
             />
             {/* Hover image */}
             {product.image2 && (
@@ -73,7 +73,7 @@ export default function ProductCard({ product }: { product: Product }) {
                 alt={`${product.name} alternate`}
                 loading="lazy"
                 onError={(e) => { e.currentTarget.style.display = "none"; }}
-                className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ${hovered ? "opacity-100" : "opacity-0"} group-hover:scale-105`}
+                className={`absolute inset-0 w-full h-full object-contain p-4 transition-all duration-500 ${hovered ? "opacity-100" : "opacity-0"} group-hover:scale-105`}
               />
             )}
           </>

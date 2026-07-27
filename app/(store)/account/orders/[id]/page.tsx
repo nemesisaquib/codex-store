@@ -99,7 +99,7 @@ export default function OrderDetailPage() {
           {items.map((item,i) => (
             <div key={i} className="flex items-center gap-4 py-3 border-b border-neutral-100 dark:border-neutral-800 last:border-0">
               <div className="w-14 h-16 rounded-lg overflow-hidden bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center flex-shrink-0">
-                {item.image ? <img src={item.image} alt={item.name} className="w-full h-full object-cover"/> : <Package size={18} className="text-neutral-300"/>}
+                {item.image ? <img src={item.image} alt={item.name} className="w-full h-full object-contain p-2"/> : <Package size={18} className="text-neutral-300"/>}
               </div>
               <div className="flex-1"><p className="text-sm font-medium text-neutral-900 dark:text-white">{item.name}</p><p className="text-xs text-neutral-400">Qty: {item.qty}</p></div>
               <p className="font-bold text-sm text-neutral-900 dark:text-white">${item.price}</p>

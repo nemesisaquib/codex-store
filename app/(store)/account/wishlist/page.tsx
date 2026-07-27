@@ -38,7 +38,7 @@ export default function WishlistPage() {
           {items.map(item => (
             <div key={item.id} className="bg-white dark:bg-neutral-900 rounded-2xl overflow-hidden group">
               <div className="aspect-square bg-neutral-100 dark:bg-neutral-800 relative overflow-hidden">
-                {item.image_url ? <img src={item.image_url} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" /> : ""}
+                {item.image_url ? <img src={item.image_url} alt={item.name} className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform" /> : ""}
                 <button onClick={() => remove(item.id)} className="absolute top-2 right-2 p-2 bg-white dark:bg-neutral-800 rounded-full text-[#e02020] hover:bg-[#e02020] hover:text-white transition-colors">
                   <Heart size={16} className="fill-current" />
                 </button>

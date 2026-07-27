@@ -23,7 +23,7 @@ export default function NewArrivalsPage() {
             <Sparkles size={16}/><span className="text-xs font-bold tracking-widest uppercase">Just Dropped</span>
           </div>
           <h1 className="font-display font-black text-white text-4xl md:text-6xl">New <em className="italic text-[#e02020]">Arrivals</em></h1>
-          <p className="text-white/50 mt-3">The latest from the CODEX edit. {products.length} pieces available now.</p>
+          <p className="text-white/50 mt-3">The latest from the E-shop edit. {products.length} pieces available now.</p>
         </div>
       </div>
       <div className="max-w-[1440px] mx-auto px-6 lg:px-10 py-12">

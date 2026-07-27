@@ -26,7 +26,7 @@ const nextConfig: NextConfig = {
   compress: true,
 
   // ─── Native modules: keep out of JS bundle
-  serverExternalPackages: [],
+  serverExternalPackages: ["better-sqlite3", "@libsql/client"],
 
   // ─── Strip console in prod (keep errors for monitoring)
   compiler: {

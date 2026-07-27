@@ -76,7 +76,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
         {!collapsed && (
           <div>
-            <p className="font-display font-black text-white text-base leading-none">CODEX</p>
+            <p className="font-display font-black text-white text-base leading-none">E-shop</p>
             <p className="text-[10px] text-neutral-500 font-bold tracking-widest uppercase mt-0.5">Admin</p>
           </div>
         )}

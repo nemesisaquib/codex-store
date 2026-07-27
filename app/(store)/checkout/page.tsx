@@ -105,7 +105,7 @@ export default function CheckoutPage() {
       {/* Header */}
       <div className="border-b border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 px-6 py-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <Link href="/" className="font-display font-black text-xl text-[#e02020]">CODEX</Link>
+          <Link href="/" className="font-display font-black text-xl text-[#e02020]">E-shop</Link>
           <div className="flex items-center gap-2">
             {STEPS.map((s,i) => (
               <div key={s} className="flex items-center gap-2">

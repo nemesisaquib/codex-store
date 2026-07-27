@@ -63,7 +63,7 @@ export default function OrdersPage() {
                 <div className="flex gap-2 mb-4">
                   {items.map((item,i)=>(
                     <div key={i} className="w-14 h-16 rounded-lg flex-shrink-0 overflow-hidden bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center">
-                      {item.image ? <img src={item.image} alt={item.name} className="w-full h-full object-cover"/> : <Package size={18} className="text-neutral-300"/>}
+                      {item.image ? <img src={item.image} alt={item.name} className="w-full h-full object-contain p-2"/> : <Package size={18} className="text-neutral-300"/>}
                     </div>
                   ))}
                 </div>

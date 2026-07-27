@@ -32,7 +32,7 @@ export default function AdminLoginPage() {
           <div className="w-14 h-14 bg-[#e02020] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-[#e02020]/30">
             <Store size={28} className="text-white"/>
           </div>
-          <h1 className="font-display font-black text-white text-2xl">CODEX Admin</h1>
+          <h1 className="font-display font-black text-white text-2xl">E-shop Admin</h1>
           <p className="text-neutral-500 text-sm mt-1">Sign in to your dashboard</p>
         </div>
 

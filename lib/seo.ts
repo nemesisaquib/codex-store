@@ -38,7 +38,7 @@ export function getProductMetadata(slug: string): Metadata {
     if (!p) return {};
     const img = p.og_image || p.image_url || undefined;
     return {
-      title: p.meta_title || `${p.name} — ${p.brand} | CODEX`,
+      title: p.meta_title || `${p.name} — ${p.brand} | E-shop`,
       description: p.meta_desc || `Shop the ${p.name} from ${p.brand}. $${p.price}. Free shipping over $150.`,
       openGraph: {
         title: p.meta_title || p.name,

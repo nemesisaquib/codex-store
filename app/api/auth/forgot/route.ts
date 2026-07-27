@@ -28,11 +28,11 @@ export async function POST(req: NextRequest) {
       const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3004"));
       const url = `${baseUrl}/auth/reset?token=${token}`;
       const html = emailTemplate(
-        "Reset your CODEX password",
+        "Reset your E-shop password",
         `<p>Hi ${customer.first_name},</p><p>We received a request to reset your password. Click the button below to choose a new one. This link expires in 15 minutes.</p><p style="color:#a3a3a3;font-size:13px;margin-top:16px">If you didn't request this, ignore this email — your password won't change.</p>`,
         { label: "Reset Password", url }
       );
-      await sendEmail(email, "Reset your CODEX password", html);
+      await sendEmail(email, "Reset your E-shop password", html);
     }
 
     return NextResponse.json({ ok: true });

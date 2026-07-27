@@ -99,7 +99,22 @@ export default function Footer() {
           {/* Brand col */}
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="inline-block mb-4">
-              <span className="font-display font-black text-white text-2xl tracking-tight">CODEX</span>
+              <div 
+                style={{ 
+                  width: "140px", 
+                  height: "40px", 
+                  backgroundColor: "#ffffff",
+                  maskImage: 'url("/Logo+ favicon/Eshop.png")',
+                  WebkitMaskImage: 'url("/Logo+ favicon/Eshop.png")',
+                  maskSize: 'contain',
+                  WebkitMaskSize: 'contain',
+                  maskRepeat: 'no-repeat',
+                  WebkitMaskRepeat: 'no-repeat',
+                  maskPosition: 'left center',
+                  WebkitMaskPosition: 'left center'
+                }} 
+                aria-label="E-shop Logo"
+              />
             </Link>
             <p className="text-sm leading-relaxed">
               Premium global fashion for everyone. Wear the World.
@@ -131,25 +146,23 @@ export default function Footer() {
           {/* Dynamic credit */}
           <p className="text-neutral-500">
             Design &amp; Development by{" "}
-            <span className="text-[#e02020] font-semibold">Aquib</span>
+            <a 
+              href="https://aquibdesigner.framer.website/" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-white hover:text-[#e02020] font-semibold transition-colors underline decoration-neutral-700 underline-offset-4"
+            >
+              Mohd Aquib Javed
+            </a>
             {" "}©{" "}
             <span suppressHydrationWarning>{year}</span>
-            {" · CODEX"}
+            {" · E-shop"}
           </p>
 
           <div className="flex gap-6">
             <Link href="/privacy"  className="hover:text-white transition-colors">Privacy Policy</Link>
             <Link href="/terms"    className="hover:text-white transition-colors">Terms &amp; Conditions</Link>
             <Link href="/cookies"  className="hover:text-white transition-colors">Cookie Policy</Link>
-          </div>
-
-          <div className="flex items-center gap-1.5 text-neutral-600">
-            {/* Lock icon SVG */}
-            <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-              <path d="M7 11V7a5 5 0 0110 0v4"/>
-            </svg>
-            <span>Secure payments · PCI DSS Level 1</span>
           </div>
         </div>
       </div>

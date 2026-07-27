@@ -77,7 +77,7 @@ function CheckoutSuccessContent() {
           <CheckCircle size={44} className="text-green-500" />
         </div>
         <h1 className="font-display font-black text-3xl text-neutral-900 dark:text-white mb-2">Order Confirmed!</h1>
-        <p className="text-neutral-500 mb-2">Thank you for shopping with CODEX.</p>
+        <p className="text-neutral-500 mb-2">Thank you for shopping with E-shop.</p>
         <p className="font-mono-brand text-[#e02020] font-bold text-sm mb-8">{order.order_number}</p>
 
         {/* Timeline */}

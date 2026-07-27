@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useEffect, useState } from "react";
 import { Tag } from "lucide-react";
 import Link from "next/link";
@@ -14,7 +14,7 @@ export default function SalePage() {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/products?sale=1&limit=48&sort=${sort}`)
+    fetch(`/api/products?sale=1&limit=200&sort=${sort}`)
       .then(r => r.json())
       .then((d: { products: ApiProduct[]; total: number }) => {
         setProducts(d.products.map(toProduct));

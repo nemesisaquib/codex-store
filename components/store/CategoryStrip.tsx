@@ -1,3 +1,4 @@
+"use client";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
@@ -5,28 +6,28 @@ const categories = [
   {
     label:    "Women",
     href:     "/category/women",
-    bg:       "linear-gradient(160deg,#c41e3a 0%,#7d1111 60%,#2d1b1b 100%)",
+    image:    "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80&w=800&h=1000",
     accent:   "#e02020",
     items:    "12,400+ items",
   },
   {
     label:    "Men",
     href:     "/category/men",
-    bg:       "linear-gradient(160deg,#1a1a2e 0%,#16213e 60%,#0f3460 100%)",
+    image:    "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&q=80&w=800&h=1000",
     accent:   "#0a0a0a",
     items:    "9,600+ items",
   },
   {
     label:    "Kids",
     href:     "/category/kids",
-    bg:       "linear-gradient(160deg,#d4a017 0%,#9a7012 60%,#3d2b00 100%)",
+    image:    "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?auto=format&fit=crop&q=80&w=800&h=1000",
     accent:   "#d4a017",
     items:    "5,200+ items",
   },
   {
     label:    "Sale",
     href:     "/sale",
-    bg:       "linear-gradient(160deg,#e02020 0%,#9a1414 50%,#1a0000 100%)",
+    image:    "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80&w=800&h=1000",
     accent:   "#e02020",
     items:    "Up to 70% off",
     hot:      true,
@@ -47,7 +48,7 @@ export default function CategoryStrip() {
           </h2>
         </div>
         <Link
-          href="/categories"
+          href="/category/all"
           className="hidden md:flex items-center gap-1.5 text-sm font-medium text-neutral-500 hover:text-[#e02020] transition-colors"
         >
           All categories <ArrowRight size={15} />
@@ -55,29 +56,29 @@ export default function CategoryStrip() {
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {categories.map((cat) => (
           <Link
             key={cat.label}
             href={cat.href}
-            className="category-card relative overflow-hidden rounded-2xl aspect-[3/4] block group"
+            className="category-card relative overflow-hidden rounded-2xl aspect-[4/5] block group shadow-sm hover:shadow-xl transition-all duration-500 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200/60 dark:border-neutral-800"
           >
-            {/* Background */}
-            <div
-              className="absolute inset-0"
-              style={{ background: cat.bg }}
+            {/* Image */}
+            <img
+              src={cat.image}
+              alt={cat.label}
+              loading="lazy"
+              onError={(e) => { e.currentTarget.style.opacity = "0.5"; }}
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
 
-            {/* Dark overlay */}
-            <div
-              className="cat-overlay absolute inset-0 bg-neutral-950"
-              style={{ opacity: 0.35 }}
-            />
+            {/* Bottom Vignette Gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent transition-opacity duration-300 group-hover:opacity-85" />
 
             {/* Hot badge */}
             {cat.hot && (
               <div className="absolute top-4 right-4 z-10">
-                <span className="badge-sale bg-[#e02020] text-white text-[10px] font-bold px-2 py-1 rounded-md tracking-wider">
+                <span className="badge-sale bg-[#e02020] text-white text-[10px] font-bold px-2.5 py-1 rounded-md tracking-wider shadow-md">
                   HOT
                 </span>
               </div>
@@ -85,14 +86,13 @@ export default function CategoryStrip() {
 
             {/* Label */}
             <div className="cat-label absolute bottom-0 left-0 right-0 p-5 z-10">
-              <p className="text-white font-display font-bold text-2xl leading-tight mb-1">
+              <p className="text-white font-sans font-bold text-xl md:text-2xl leading-tight mb-1 drop-shadow-md">
                 {cat.label}
               </p>
-              <p className="text-white/60 text-xs font-medium">{cat.items}</p>
-              <div
-                className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              >
-                Shop now <ArrowRight size={12} />
+              <p className="text-white/80 text-xs font-medium drop-shadow-sm">{cat.items}</p>
+              <div className="mt-2.5 inline-flex items-center gap-1.5 text-xs font-bold text-white group-hover:text-white transition-colors">
+                <span>Shop now</span>
+                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
               </div>
             </div>
 

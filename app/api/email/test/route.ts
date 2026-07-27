@@ -18,10 +18,10 @@ export async function POST(req: NextRequest) {
     }
     const html = emailTemplate(
       "SMTP Test Successful ✅",
-      "<p>Your CODEX admin SMTP configuration is working correctly. Transactional emails are ready to send.</p><p style='color:#a3a3a3;font-size:13px;margin-top:16px'>This is an automated test message.</p>",
+      "<p>Your E-shop admin SMTP configuration is working correctly. Transactional emails are ready to send.</p><p style='color:#a3a3a3;font-size:13px;margin-top:16px'>This is an automated test message.</p>",
       { label: "Open Admin", url: "http://localhost:3004/admin" }
     );
-    const result = await sendEmail(to, "CODEX — SMTP Test", html);
+    const result = await sendEmail(to, "E-shop — SMTP Test", html);
     return NextResponse.json(result, { status: result.ok ? 200 : 500 });
   } catch (e) {
     return NextResponse.json({ ok: false, error: String(e) }, { status: 500 });

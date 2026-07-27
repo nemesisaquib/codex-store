@@ -78,7 +78,7 @@ function buildContent(slug: string): PageContent | null {
         icon: RotateCcw, title: "Returns & Exchanges", subtitle: "Easy 30-day returns",
         body: (
           <div className="space-y-4 text-neutral-600 dark:text-neutral-400">
-            <p>We want you to love your CODEX pieces. If something isn't right, return it within <strong className="text-neutral-900 dark:text-white">30 days</strong> for a full refund or exchange.</p>
+            <p>We want you to love your E-shop pieces. If something isn't right, return it within <strong className="text-neutral-900 dark:text-white">30 days</strong> for a full refund or exchange.</p>
             <ul className="space-y-2 list-disc pl-5">
               <li>Items must be unworn, unwashed, with original tags attached.</li>
               <li>Returns are <strong className="text-neutral-900 dark:text-white">free</strong> — we provide a prepaid label.</li>
@@ -125,7 +125,7 @@ function buildContent(slug: string): PageContent | null {
             </div>
             <div className="space-y-5 text-sm text-neutral-600 dark:text-neutral-400">
               <div><p className="font-semibold text-neutral-900 dark:text-white mb-1">Email</p><p>support@codex-store.com</p></div>
-              <div><p className="font-semibold text-neutral-900 dark:text-white mb-1">Phone</p><p>+1 (800) 555-CODEX</p></div>
+              <div><p className="font-semibold text-neutral-900 dark:text-white mb-1">Phone</p><p>+1 (800) 555-E-shop</p></div>
               <div><p className="font-semibold text-neutral-900 dark:text-white mb-1">Hours</p><p>Mon–Fri, 9am–6pm EST</p></div>
               <div><p className="font-semibold text-neutral-900 dark:text-white mb-1">Headquarters</p><p>120 Fashion Ave, New York, NY 10001</p></div>
             </div>
@@ -134,10 +134,10 @@ function buildContent(slug: string): PageContent | null {
       };
     case "about":
       return {
-        icon: Building2, title: "About CODEX", subtitle: "Wear the World",
+        icon: Building2, title: "About E-shop", subtitle: "Wear the World",
         body: (
           <div className="space-y-4 text-neutral-600 dark:text-neutral-400 max-w-2xl">
-            <p>CODEX is a premium global fashion house bringing together the finest designs from around the world. Founded on the belief that great style transcends borders, we curate collections that blend craftsmanship, sustainability, and modern sensibility.</p>
+            <p>E-shop is a premium global fashion house bringing together the finest designs from around the world. Founded on the belief that great style transcends borders, we curate collections that blend craftsmanship, sustainability, and modern sensibility.</p>
             <p>From our beginnings as a small studio to serving over 2 million customers across 120 countries, our mission remains unchanged: to help you wear the world with confidence.</p>
             <p>Every piece is selected for quality, designed to last, and made with respect for the people and planet behind it.</p>
           </div>
@@ -145,7 +145,7 @@ function buildContent(slug: string): PageContent | null {
       };
     case "careers":
       return {
-        icon: Briefcase, title: "Careers", subtitle: "Join the CODEX team",
+        icon: Briefcase, title: "Careers", subtitle: "Join the E-shop team",
         body: (
           <div className="space-y-4">
             <p className="text-neutral-600 dark:text-neutral-400 max-w-2xl">We're always looking for passionate people to join our growing team. Explore open roles across design, technology, operations, and customer experience.</p>
@@ -164,8 +164,8 @@ function buildContent(slug: string): PageContent | null {
       return { icon: Newspaper, title: "Press", subtitle: "News & media",
         body: <p className="text-neutral-600 dark:text-neutral-400 max-w-2xl">For press inquiries, interviews, or media assets, reach our communications team at <a href="mailto:press@codex-store.com" className="text-[#e02020] hover:underline">press@codex-store.com</a>. Download our brand kit and latest releases.</p> };
     case "affiliates":
-      return { icon: Users, title: "Affiliate Program", subtitle: "Earn with CODEX",
-        body: <p className="text-neutral-600 dark:text-neutral-400 max-w-2xl">Partner with CODEX and earn up to 12% commission on every sale you refer. Join thousands of creators sharing the styles they love. Apply at <a href="mailto:affiliates@codex-store.com" className="text-[#e02020] hover:underline">affiliates@codex-store.com</a>.</p> };
+      return { icon: Users, title: "Affiliate Program", subtitle: "Earn with E-shop",
+        body: <p className="text-neutral-600 dark:text-neutral-400 max-w-2xl">Partner with E-shop and earn up to 12% commission on every sale you refer. Join thousands of creators sharing the styles they love. Apply at <a href="mailto:affiliates@codex-store.com" className="text-[#e02020] hover:underline">affiliates@codex-store.com</a>.</p> };
     case "sustainability":
       return { icon: Leaf, title: "Sustainability", subtitle: "Fashion with a conscience",
         body: (
@@ -184,7 +184,7 @@ function buildContent(slug: string): PageContent | null {
         body: <p className="text-neutral-600 dark:text-neutral-400 max-w-2xl">We respect your privacy. We collect only the data needed to process orders and improve your experience. We never sell your personal information. For full details on data collection, cookies, and your rights, contact <a href="mailto:privacy@codex-store.com" className="text-[#e02020] hover:underline">privacy@codex-store.com</a>.</p> };
     case "terms":
       return { icon: FileText, title: "Terms & Conditions", subtitle: "The rules of engagement",
-        body: <p className="text-neutral-600 dark:text-neutral-400 max-w-2xl">By using CODEX, you agree to our terms of service covering orders, payments, returns, intellectual property, and acceptable use. These terms are governed by the laws of the State of New York. Last updated June 2026.</p> };
+        body: <p className="text-neutral-600 dark:text-neutral-400 max-w-2xl">By using E-shop, you agree to our terms of service covering orders, payments, returns, intellectual property, and acceptable use. These terms are governed by the laws of the State of New York. Last updated June 2026.</p> };
     case "cookies":
       return { icon: Cookie, title: "Cookie Policy", subtitle: "How we use cookies",
         body: <p className="text-neutral-600 dark:text-neutral-400 max-w-2xl">We use cookies to keep you signed in, remember your cart, and understand how our site is used. You can manage cookie preferences in your browser settings. Essential cookies are required for the site to function.</p> };

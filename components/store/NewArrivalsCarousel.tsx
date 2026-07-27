@@ -10,7 +10,7 @@ export default function NewArrivalsCarousel() {
   const [products, setProducts] = useState<ReturnType<typeof toProduct>[]>([]);
 
   useEffect(() => {
-    fetch("/api/products?limit=12&is_new=1")
+    fetch("/api/products?limit=100&is_new=1")
       .then(r => r.json())
       .then((d: { products: ApiProduct[] }) => {
         // show newest items (is_new=1 first, then fill from all)

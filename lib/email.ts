@@ -16,7 +16,7 @@ export function getSmtpConfig(): SmtpConfig | null {
     port: parseInt(map.smtp_port || "587"),
     user: map.smtp_user,
     pass: map.smtp_pass || "",
-    fromName: map.smtp_from_name || "CODEX",
+    fromName: map.smtp_from_name || "E-shop",
     fromEmail: map.smtp_from_email || map.smtp_user,
     secure: map.smtp_secure === "true",
   };
@@ -53,7 +53,7 @@ export function emailTemplate(heading: string, body: string, cta?: { label: stri
     <tr><td align="center">
       <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06)">
         <tr><td style="background:#0a0a0a;padding:24px 32px">
-          <span style="color:#fff;font-size:22px;font-weight:900;letter-spacing:-.5px">CODEX</span>
+          <span style="color:#fff;font-size:22px;font-weight:900;letter-spacing:-.5px">E-shop</span>
           <span style="color:#e02020;font-size:11px;font-weight:700;letter-spacing:2px;margin-left:8px">WEAR THE WORLD</span>
         </td></tr>
         <tr><td style="padding:40px 32px">
@@ -62,7 +62,7 @@ export function emailTemplate(heading: string, body: string, cta?: { label: stri
           ${cta ? `<a href="${cta.url}" style="display:inline-block;margin-top:24px;background:#e02020;color:#fff;text-decoration:none;font-weight:600;font-size:14px;padding:12px 28px;border-radius:999px">${cta.label}</a>` : ""}
         </td></tr>
         <tr><td style="background:#fafafa;padding:24px 32px;border-top:1px solid #e5e5e5">
-          <p style="margin:0;font-size:12px;color:#a3a3a3">© ${new Date().getFullYear()} CODEX · Design &amp; Development by Aquib</p>
+          <p style="margin:0;font-size:12px;color:#a3a3a3">© ${new Date().getFullYear()} E-shop · Design &amp; Development by Aquib</p>
         </td></tr>
       </table>
     </td></tr>

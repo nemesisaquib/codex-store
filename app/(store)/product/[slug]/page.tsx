@@ -110,7 +110,7 @@ export default function ProductPage() {
                   className={`w-20 h-24 rounded-xl flex-shrink-0 border-2 overflow-hidden transition-all relative ${activeImg===i?"border-[#e02020]":"border-transparent hover:border-neutral-300"}`}
                   style={{ background: bgs[i % bgs.length] }}>
                   {gallery.length > 0 && (
-                    <img src={g} alt="" className="absolute inset-0 w-full h-full object-cover" onError={e=>(e.currentTarget.style.display="none")}/>
+                    <img src={g} alt="" className="absolute inset-0 w-full h-full object-contain p-1" onError={e=>(e.currentTarget.style.display="none")}/>
                   )}
                 </button>
               ))}
@@ -122,7 +122,7 @@ export default function ProductPage() {
                   key={gallery[activeImg] ?? gallery[0]}
                   src={gallery[activeImg] ?? gallery[0]}
                   alt={product.name}
-                  className="absolute inset-0 w-full h-full object-cover"
+                  className="absolute inset-0 w-full h-full object-contain p-8"
                   onError={e=>(e.currentTarget.style.display="none")}
                 />
               )}

@@ -31,7 +31,7 @@ export default function CategoryPage() {
 
   useEffect(() => {
     setLoading(true);
-    const params = new URLSearchParams({ limit: "48", sort });
+    const params = new URLSearchParams({ limit: "200", sort });
     if (slug !== "all") params.set("category", slug);
     fetch(`/api/products?${params}`)
       .then(r => r.json())
@@ -50,7 +50,7 @@ export default function CategoryPage() {
       {/* Hero */}
       <div className="bg-neutral-950 text-white py-14 px-6 lg:px-10">
         <div className="max-w-[1440px] mx-auto">
-          <p className="text-[#e02020] text-xs font-bold tracking-widest uppercase mb-2">CODEX / {label}</p>
+          <p className="text-[#e02020] text-xs font-bold tracking-widest uppercase mb-2">E-shop / {label}</p>
           <h1 className="font-display font-black text-4xl md:text-5xl">{label}</h1>
           <p className="text-white/50 mt-2 text-sm">{total} products</p>
         </div>

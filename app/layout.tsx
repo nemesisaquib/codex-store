@@ -30,13 +30,13 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CODEX — Wear the World | Premium Global Fashion",
+  title: "E-shop — Wear the World | Premium Global Fashion",
   description: "Premium international clothing eCommerce. Shop women, men, and kids fashion.",
   robots: { index: true, follow: true },
   openGraph: {
     type: "website",
-    siteName: "CODEX",
-    title: "CODEX — Wear the World",
+    siteName: "E-shop",
+    title: "E-shop — Wear the World",
     description: "Premium global fashion for women, men, and kids.",
   },
 };
@@ -56,6 +56,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`h-full antialiased ${playfair.variable} ${dmSans.variable} ${jetbrains.variable}`}>
       <head>
+        {/* Favicons & Manifest */}
+        <link rel="icon" type="image/png" href="/Logo+ favicon/favicon/favicon-96x96.png" sizes="96x96" />
+        <link rel="icon" type="image/svg+xml" href="/Logo+ favicon/favicon/favicon.svg" />
+        <link rel="shortcut icon" href="/Logo+ favicon/favicon/favicon.ico" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/Logo+ favicon/favicon/apple-touch-icon.png" />
+        <meta name="apple-mobile-web-app-title" content="E-shop" />
+        <link rel="manifest" href="/Logo+ favicon/favicon/site.webmanifest" />
+
         {/* DNS prefetch for external image CDNs */}
         <link rel="dns-prefetch" href="//images.unsplash.com" />
         <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />

@@ -155,7 +155,7 @@ export default function CartAside({ open, onClose }: { open: boolean; onClose: (
                   {/* Image */}
                   <div className="w-[68px] h-[84px] rounded-xl bg-neutral-100 dark:bg-neutral-800 flex-shrink-0 overflow-hidden">
                     {item.image
-                      ? <img src={item.image} alt={item.name} className="w-full h-full object-cover" onError={e => { e.currentTarget.style.display = "none"; }} />
+                      ? <img src={item.image} alt={item.name} className="w-full h-full object-contain p-1" onError={e => { e.currentTarget.style.display = "none"; }} />
                       : <div className="w-full h-full flex items-center justify-center"><ShoppingBag size={20} className="text-neutral-300" /></div>
                     }
                   </div>

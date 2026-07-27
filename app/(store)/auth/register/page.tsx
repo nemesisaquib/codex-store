@@ -63,13 +63,13 @@ export default function RegisterPage() {
           style={{ backgroundImage: "repeating-linear-gradient(45deg,#fff 0px,#fff 1px,transparent 1px,transparent 40px)" }}
         />
         <Link href="/" className="relative z-10">
-          <span className="font-display font-black text-white text-3xl">CODEX</span>
+          <span className="font-display font-black text-white text-3xl">E-shop</span>
         </Link>
         <div className="relative z-10">
           <p className="font-display font-black text-white leading-tight mb-6" style={{ fontSize: "3rem" }}>
             Join the
             <br />
-            <em className="italic text-[#3b82f6]">CODEX</em>
+            <em className="italic text-[#3b82f6]">E-shop</em>
             <br />
             community.
           </p>
@@ -90,7 +90,7 @@ export default function RegisterPage() {
       <div className="flex items-center justify-center p-8 bg-white dark:bg-neutral-950">
         <div className="w-full max-w-md">
           <Link href="/" className="lg:hidden font-display font-black text-2xl text-[#e02020] block mb-10">
-            CODEX
+            E-shop
           </Link>
           <h1 className="font-display font-bold text-3xl text-neutral-900 dark:text-white mb-2">Create account</h1>
           <p className="text-neutral-500 text-sm mb-8">
@@ -175,7 +175,7 @@ export default function RegisterPage() {
                 className="mt-0.5 accent-[#e02020]"
               />
               <span className="text-xs text-neutral-500">
-                I agree to CODEX's{" "}
+                I agree to E-shop's{" "}
                 <Link href="/terms" className="text-[#e02020] hover:underline">
                   Terms
                 </Link>{" "}

@@ -4,7 +4,7 @@ import ProductCard from "./ProductCard";
 import { fetchProducts, toProduct } from "@/lib/api";
 
 export default async function FeaturedProducts() {
-  const { products: raw } = await fetchProducts({ limit: 8 });
+  const { products: raw } = await fetchProducts({ limit: 100 });
   const products = raw.map(toProduct);
 
   return (

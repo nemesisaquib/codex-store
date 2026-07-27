@@ -50,7 +50,7 @@ export default function LoginPage() {
           style={{ backgroundImage: "repeating-linear-gradient(45deg,#fff 0px,#fff 1px,transparent 1px,transparent 40px)" }}
         />
         <Link href="/" className="relative z-10">
-          <span className="font-display font-black text-white text-3xl">CODEX</span>
+          <span className="font-display font-black text-white text-3xl">E-shop</span>
         </Link>
         <div className="relative z-10">
           <p className="font-display font-black text-white leading-tight mb-4" style={{ fontSize: "3.5rem" }}>
@@ -78,7 +78,7 @@ export default function LoginPage() {
       <div className="flex items-center justify-center p-8 bg-white dark:bg-neutral-950">
         <div className="w-full max-w-md">
           <Link href="/" className="lg:hidden font-display font-black text-2xl text-[#e02020] block mb-10">
-            CODEX
+            E-shop
           </Link>
           <h1 className="font-display font-bold text-3xl text-neutral-900 dark:text-white mb-2">Sign in</h1>
           <p className="text-neutral-500 text-sm mb-8">

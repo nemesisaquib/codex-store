@@ -22,8 +22,11 @@ export async function GET(req: NextRequest) {
       params.push(category);
     }
     if (q) {
-      where.push("(LOWER(name) LIKE LOWER(?) OR LOWER(brand) LIKE LOWER(?))");
-      params.push(`%${q}%`, `%${q}%`);
+      const terms = q.trim().split(/\s+/).filter(Boolean);
+      for (const term of terms) {
+        where.push("(LOWER(name) LIKE LOWER(?) OR LOWER(brand) LIKE LOWER(?) OR LOWER(category) LIKE LOWER(?) OR LOWER(description) LIKE LOWER(?))");
+        params.push(`%${term}%`, `%${term}%`, `%${term}%`, `%${term}%`);
+      }
     }
     if (isNew === "1") {
       where.push("is_new = 1");

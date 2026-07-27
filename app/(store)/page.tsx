@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import HeroBanner        from "@/components/store/HeroBanner";
 import CategoryStrip     from "@/components/store/CategoryStrip";
+import TrendingSelection from "@/components/store/TrendingSelection";
 import FeaturedProducts  from "@/components/store/FeaturedProducts";
 import VideoShowcase     from "@/components/store/VideoShowcase";
 import NewArrivalsCarousel from "@/components/store/NewArrivalsCarousel";
@@ -16,6 +17,7 @@ export default function HomePage() {
     <>
       <HeroBanner />
       <CategoryStrip />
+      <TrendingSelection />
       <FeaturedProducts />
       <VideoShowcase />
       <NewArrivalsCarousel />

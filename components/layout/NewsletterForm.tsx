@@ -24,7 +24,7 @@ export default function NewsletterForm() {
   if (state === "done") {
     return (
       <p className="text-sm text-green-400 font-medium py-2.5">
-        ✓ Subscribed — welcome to CODEX.
+        ✓ Subscribed — welcome to E-shop.
       </p>
     );
   }

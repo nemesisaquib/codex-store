@@ -82,7 +82,7 @@ const QuickView = memo(({ product, open, onClose }: QuickViewProps) => {
                 <img
                   key={i} src={src} alt={product.name}
                   loading={i === 0 ? "eager" : "lazy"}
-                  className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-400 ${i === imgIdx ? "opacity-100" : "opacity-0"}`}
+                  className={`absolute inset-0 w-full h-full object-contain p-6 transition-opacity duration-400 ${i === imgIdx ? "opacity-100" : "opacity-0"}`}
                 />
               ))
             ) : (

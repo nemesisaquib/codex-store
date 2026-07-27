@@ -34,7 +34,7 @@ export default function ForgotPasswordPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-950 p-6">
       <div className="w-full max-w-md bg-white dark:bg-neutral-900 rounded-2xl shadow-xl p-10">
-        <Link href="/" className="font-display font-black text-xl text-[#e02020] block mb-8">CODEX</Link>
+        <Link href="/" className="font-display font-black text-xl text-[#e02020] block mb-8">E-shop</Link>
         {!sent ? (
           <>
             <h1 className="font-display font-bold text-2xl text-neutral-900 dark:text-white mb-2">Forgot password?</h1>
