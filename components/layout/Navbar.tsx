@@ -288,7 +288,7 @@ export default function Navbar() {
             {/* ── Logo ── */}
             <Link href="/" className="flex-shrink-0 mr-6 lg:mr-10 group flex items-center shrink-0">
               <img 
-                src="/Logo+ favicon/Eshop.png" 
+                src="/Logo+%20favicon/Eshop.png" 
                 alt="E-shop Logo" 
                 style={{ height: "36px", maxHeight: "36px", width: "auto", maxWidth: "160px", objectFit: "contain" }}
                 className="transition-transform duration-300 group-hover:scale-105" 

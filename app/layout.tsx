@@ -57,12 +57,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`h-full antialiased ${playfair.variable} ${dmSans.variable} ${jetbrains.variable}`}>
       <head>
         {/* Favicons & Manifest */}
-        <link rel="icon" type="image/png" href="/Logo+ favicon/favicon/favicon-96x96.png" sizes="96x96" />
-        <link rel="icon" type="image/svg+xml" href="/Logo+ favicon/favicon/favicon.svg" />
-        <link rel="shortcut icon" href="/Logo+ favicon/favicon/favicon.ico" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/Logo+ favicon/favicon/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" href="/Logo+%20favicon/favicon/favicon-96x96.png" sizes="96x96" />
+        <link rel="icon" type="image/svg+xml" href="/Logo+%20favicon/favicon/favicon.svg" />
+        <link rel="shortcut icon" href="/Logo+%20favicon/favicon/favicon.ico" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/Logo+%20favicon/favicon/apple-touch-icon.png" />
         <meta name="apple-mobile-web-app-title" content="E-shop" />
-        <link rel="manifest" href="/Logo+ favicon/favicon/site.webmanifest" />
+        <link rel="manifest" href="/Logo+%20favicon/favicon/site.webmanifest" />
 
         {/* DNS prefetch for external image CDNs */}
         <link rel="dns-prefetch" href="//images.unsplash.com" />
