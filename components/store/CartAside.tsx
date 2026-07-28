@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
+import Image from "next/image";
 import { X, ShoppingBag, Trash2, ArrowRight, Tag, Truck, Plus, Minus, Package, Sparkles } from "lucide-react";
 
 interface CartItem { productId: string; name: string; qty: number; price: number; image?: string }
@@ -54,7 +55,11 @@ export default function CartAside({ open, onClose }: { open: boolean; onClose: (
   // Debounced cart save
   useEffect(() => {
     const t = setTimeout(() => {
-      if (!loading) fetch("/api/cart", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items }) }).catch(() => {});
+      if (!loading) {
+        fetch("/api/cart", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items }) })
+          .then(() => window.dispatchEvent(new Event("cart-updated")))
+          .catch(() => {});
+      }
     }, 600);
     return () => clearTimeout(t);
   }, [items, loading]);
@@ -109,7 +114,7 @@ export default function CartAside({ open, onClose }: { open: boolean; onClose: (
               <div className="flex items-center gap-1.5">
                 <Truck size={12} className={progress >= 100 ? "text-green-500" : "text-neutral-400"} />
                 <span className="text-[11px] text-neutral-500 dark:text-neutral-400">
-                  {progress >= 100 ? <span className="text-green-600 font-semibold">🎉 Free shipping unlocked!</span> : <><span className="font-semibold text-neutral-900 dark:text-white">${remaining.toFixed(0)}</span> away from free shipping</>}
+                  {progress >= 100 ? <span className="text-green-600 font-semibold">🎉 Free shipping unlocked!</span> : <><span className="font-semibold text-neutral-900 dark:text-white">£{remaining.toFixed(0)}</span> away from free shipping</>}
                 </span>
               </div>
               <span className="text-[10px] font-bold text-neutral-400">{Math.round(progress)}%</span>
@@ -153,9 +158,9 @@ export default function CartAside({ open, onClose }: { open: boolean; onClose: (
                 <div key={`${item.productId}-${i}`}
                   className="group flex gap-3 p-3 bg-white dark:bg-neutral-900 rounded-2xl hover:shadow-sm transition-all">
                   {/* Image */}
-                  <div className="w-[68px] h-[84px] rounded-xl bg-neutral-100 dark:bg-neutral-800 flex-shrink-0 overflow-hidden">
+                  <div className="w-[68px] h-[84px] rounded-xl bg-neutral-100 dark:bg-neutral-800 flex-shrink-0 overflow-hidden relative">
                     {item.image
-                      ? <img src={item.image} alt={item.name} className="w-full h-full object-contain p-1" onError={e => { e.currentTarget.style.display = "none"; }} />
+                      ? <Image src={item.image} alt={item.name} fill unoptimized sizes="68px" className="object-contain p-1" />
                       : <div className="w-full h-full flex items-center justify-center"><ShoppingBag size={20} className="text-neutral-300" /></div>
                     }
                   </div>
@@ -163,7 +168,7 @@ export default function CartAside({ open, onClose }: { open: boolean; onClose: (
                   <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
                     <div className="flex items-start justify-between gap-2">
                       <p className="text-[13px] font-medium text-neutral-900 dark:text-white leading-snug line-clamp-2">{item.name}</p>
-                      <button onClick={() => update(item.productId, 0)}
+                      <button onClick={() => update(item.productId, 0)} aria-label={`Remove ${item.name}`}
                         className="flex-shrink-0 p-1 text-neutral-300 hover:text-[#e02020] transition-colors opacity-0 group-hover:opacity-100">
                         <Trash2 size={13} />
                       </button>
@@ -171,17 +176,17 @@ export default function CartAside({ open, onClose }: { open: boolean; onClose: (
                     <div className="flex items-center justify-between mt-2">
                       {/* Qty stepper */}
                       <div className="flex items-center gap-0 border border-neutral-200 dark:border-neutral-700 rounded-lg overflow-hidden">
-                        <button onClick={() => update(item.productId, item.qty - 1)}
+                        <button onClick={() => update(item.productId, item.qty - 1)} aria-label="Decrease quantity"
                           className="w-7 h-7 flex items-center justify-center hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-neutral-500">
                           <Minus size={11} />
                         </button>
-                        <span className="w-8 text-center text-xs font-semibold text-neutral-900 dark:text-white">{item.qty}</span>
-                        <button onClick={() => update(item.productId, item.qty + 1)}
+                        <span className="w-8 text-center text-xs font-semibold text-neutral-900 dark:text-white" aria-label="Current quantity">{item.qty}</span>
+                        <button onClick={() => update(item.productId, item.qty + 1)} aria-label="Increase quantity"
                           className="w-7 h-7 flex items-center justify-center hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-neutral-500">
                           <Plus size={11} />
                         </button>
                       </div>
-                      <p className="font-bold text-[13px] text-neutral-900 dark:text-white">${(item.price * item.qty).toFixed(2)}</p>
+                      <p className="font-bold text-[13px] text-neutral-900 dark:text-white">£{(item.price * item.qty).toFixed(2)}</p>
                     </div>
                   </div>
                 </div>
@@ -200,7 +205,7 @@ export default function CartAside({ open, onClose }: { open: boolean; onClose: (
                   <div className="flex items-center gap-2">
                     <Tag size={13} className="text-green-600" />
                     <span className="text-xs font-semibold text-green-700 dark:text-green-400">{promoCode.code} applied</span>
-                    <span className="text-[10px] text-green-600">−{promoCode.type === "percentage" ? `${promoCode.value}%` : `$${promoCode.value}`}</span>
+                    <span className="text-[10px] text-green-600">−{promoCode.type === "percentage" ? `${promoCode.value}%` : `£${promoCode.value}`}</span>
                   </div>
                   <button onClick={() => setPromoCode(null)} className="text-green-400 hover:text-green-600">
                     <X size={13} />
@@ -229,19 +234,19 @@ export default function CartAside({ open, onClose }: { open: boolean; onClose: (
 
             {/* Totals */}
             <div className="px-5 pb-2 space-y-2">
-              <div className="flex justify-between text-[12px] text-neutral-500"><span>Subtotal ({items.length} item{items.length !== 1 ? "s" : ""})</span><span>${subtotal.toFixed(2)}</span></div>
-              {discount > 0 && <div className="flex justify-between text-[12px] text-green-600 font-medium"><span>Discount</span><span>−${discount.toFixed(2)}</span></div>}
-              <div className="flex justify-between text-[12px] text-neutral-500"><span>Shipping</span><span className={shipping === 0 ? "text-green-600 font-semibold" : ""}>{shipping === 0 ? "FREE" : `$${shipping.toFixed(2)}`}</span></div>
+              <div className="flex justify-between text-[12px] text-neutral-500"><span>Subtotal ({items.length} item{items.length !== 1 ? "s" : ""})</span><span>£{subtotal.toFixed(2)}</span></div>
+              {discount > 0 && <div className="flex justify-between text-[12px] text-green-600 font-medium"><span>Discount</span><span>−£{discount.toFixed(2)}</span></div>}
+              <div className="flex justify-between text-[12px] text-neutral-500"><span>Shipping</span><span className={shipping === 0 ? "text-green-600 font-semibold" : ""}>{shipping === 0 ? "FREE" : `£${shipping.toFixed(2)}`}</span></div>
               <div className="flex justify-between font-bold text-[15px] text-neutral-900 dark:text-white pt-2 border-t border-neutral-100 dark:border-neutral-800">
-                <span>Total</span><span>${total.toFixed(2)}</span>
+                <span>Total</span><span>£{total.toFixed(2)}</span>
               </div>
             </div>
 
             {/* CTAs */}
             <div className="px-5 pb-5 pt-3 space-y-2">
               <Link href="/checkout" onClick={onClose}
-                className="flex items-center justify-center gap-2 w-full py-3.5 bg-[#e02020] hover:bg-[#c01a1a] text-white font-bold rounded-xl text-[14px] transition-all hover:scale-[1.01] active:scale-[0.99] shadow-md shadow-[#e02020]/25">
-                Checkout — ${total.toFixed(2)} <ArrowRight size={15} />
+                className="flex items-center justify-center gap-2 w-full py-4 bg-[#e02020] hover:bg-[#c01a1a] text-white font-bold rounded-xl text-[14px] uppercase tracking-wider transition-all hover:scale-[1.01] active:scale-[0.99] shadow-lg shadow-[#e02020]/20">
+                Checkout — £{total.toFixed(2)} <ArrowRight size={15} />
               </Link>
               <button onClick={onClose}
                 className="w-full py-2.5 border border-neutral-200 dark:border-neutral-700 rounded-xl text-xs font-medium text-neutral-600 dark:text-neutral-400 hover:border-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors">

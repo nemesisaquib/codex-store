@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
 
   // ─── Image optimization: AVIF first (50% smaller), WebP fallback
   images: {
+    unoptimized: true,
     formats: ["image/avif", "image/webp"],
     // Serve at standard breakpoints only — avoids oversized variants
     deviceSizes: [375, 640, 750, 828, 1080, 1200, 1920],
@@ -19,6 +20,8 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "res.cloudinary.com" },
       { protocol: "https", hostname: "**.cloudinary.com" },
       { protocol: "https", hostname: "**.imgix.net" },
+      { protocol: "https", hostname: "cdn.dummyjson.com", port: "", pathname: "/**" },
+      { protocol: "https", hostname: "fakestoreapi.com", port: "", pathname: "/**" },
     ],
   },
 

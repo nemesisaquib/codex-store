@@ -2,7 +2,10 @@
 import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import CartAside from "@/components/store/CartAside";
+import CountrySelector from "@/components/layout/CountrySelector";
+import { useSettings } from "@/lib/SettingsContext";
 
 /* ── Inline SVG icon set ── */
 const Icon = {
@@ -210,6 +213,7 @@ const NAV_LINKS = [
 export default function Navbar() {
   const pathname = usePathname();
   const isHome = pathname === "/";
+  const { formatPrice, settings } = useSettings();
 
   const [scrolled, setScrolled]   = useState(false);
   const [mobileOpen, setMobile]   = useState(false);
@@ -237,6 +241,19 @@ export default function Navbar() {
     fn();
     window.addEventListener("scroll", fn, { passive: true });
     return () => window.removeEventListener("scroll", fn);
+  }, []);
+
+  useEffect(() => {
+    const fetchCart = () => {
+      fetch("/api/cart").then(r => r.json()).then(d => {
+        setCartCount(d.items?.reduce((a: number, c: any) => a + c.qty, 0) || 0);
+      }).catch(() => {});
+    };
+    
+    fetchCart();
+    
+    window.addEventListener("cart-updated", fetchCart);
+    return () => window.removeEventListener("cart-updated", fetchCart);
   }, []);
 
   const headerStyle: React.CSSProperties = { 
@@ -286,12 +303,11 @@ export default function Navbar() {
           <div className="flex items-center h-[68px] gap-2">
 
             {/* ── Logo ── */}
-            <Link href="/" className="flex-shrink-0 mr-6 lg:mr-10 group flex items-center shrink-0">
-              <img 
-                src="/Logo+%20favicon/Eshop.png" 
-                alt="E-shop Logo" 
-                style={{ height: "36px", maxHeight: "36px", width: "auto", maxWidth: "160px", objectFit: "contain" }}
-                className="transition-transform duration-300 group-hover:scale-105" 
+            <Link href="/" className="flex-shrink-0 mr-6 lg:mr-10 group flex items-center shrink-0 w-[120px] h-[36px]" aria-label="Home">
+              <img
+                src={settings.store_logo || "/Logo/Eshop.png"}
+                alt={`${settings.store_name || "E-shop"} Logo`}
+                className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
               />
             </Link>
 
@@ -378,11 +394,12 @@ export default function Navbar() {
                             className="relative w-full rounded-xl overflow-hidden bg-neutral-100 shadow-sm border border-neutral-200"
                             style={{ width: "130px", height: "130px" }}
                           >
-                            <img
+                            <Image
                               src={prod.image}
                               alt={prod.title}
-                              loading="lazy"
-                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                              fill
+                              sizes="130px"
+                              className="object-cover transition-transform duration-500 group-hover:scale-105"
                             />
                           </div>
                           <div>
@@ -405,6 +422,8 @@ export default function Navbar() {
 
             {/* ── Actions ── */}
             <div className="flex items-center gap-0.5 ml-auto">
+              
+              <CountrySelector />
 
               {/* Search */}
               <button
@@ -437,11 +456,12 @@ export default function Navbar() {
               <button
                 onClick={() => setCartOpen(true)}
                 aria-label={`Cart (${cartCount} items)`}
-                className={`cursor-pointer relative p-2.5 rounded-full bg-[#e02020] hover:bg-[#c01a1a] text-white transition-all duration-200 ml-2 hover:scale-110 shadow-md shadow-[#e02020]/30 ${cartOpen ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+                className={`cursor-pointer relative flex items-center gap-1.5 px-3 py-2 rounded-full bg-[#e02020] hover:bg-[#c01a1a] text-white transition-all duration-200 ml-2 shadow-md shadow-[#e02020]/30 ${cartOpen ? "opacity-0 pointer-events-none" : "opacity-100"}`}
               >
                 <Icon.Bag />
+                <span className="font-semibold text-sm hidden sm:block">Cart</span>
                 {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-neutral-900 text-white text-[10px] font-black rounded-full flex items-center justify-center leading-none border-2 border-white dark:border-neutral-950">
+                  <span className="absolute -top-1 -right-1 min-w-[20px] h-[20px] px-1 bg-neutral-900 text-white text-[11px] font-black rounded-full flex items-center justify-center leading-none border-2 border-white dark:border-neutral-950">
                     {cartCount > 9 ? "9+" : cartCount}
                   </span>
                 )}
@@ -524,8 +544,8 @@ export default function Navbar() {
                               onClick={() => { setSearch(false); setSearchVal(""); }}
                               className="flex items-center gap-4 p-3 hover:bg-neutral-50 transition-colors group"
                             >
-                              <div className="w-12 h-14 rounded-lg overflow-hidden bg-neutral-100 shrink-0 border border-neutral-200/60">
-                                <img src={img} alt={prod.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                              <div className="w-12 h-14 rounded-lg overflow-hidden bg-neutral-100 shrink-0 border border-neutral-200/60 relative">
+                                <Image src={img} alt={prod.name} fill sizes="48px" className="object-cover group-hover:scale-105 transition-transform" />
                               </div>
                               <div className="flex-1 min-w-0">
                                 <h4 className="text-xs font-bold text-neutral-900 truncate group-hover:text-[#e02020] transition-colors">
@@ -536,9 +556,9 @@ export default function Navbar() {
                                 </p>
                               </div>
                               <div className="text-right shrink-0">
-                                <span className="text-xs font-black text-[#e02020] block">${prod.price}</span>
+                                <span className="text-xs font-black text-[#e02020] block">{formatPrice(prod.price)}</span>
                                 {prod.compare_price && (
-                                  <span className="text-[10px] text-neutral-400 line-through">${prod.compare_price}</span>
+                                  <span className="text-[10px] text-neutral-400 line-through">{formatPrice(prod.compare_price)}</span>
                                 )}
                               </div>
                             </Link>
@@ -572,8 +592,10 @@ export default function Navbar() {
           <div className="absolute right-0 top-0 bottom-0 w-[320px] bg-white dark:bg-neutral-950 shadow-2xl flex flex-col">
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-100 dark:border-neutral-800">
-              <img src="/Logo+ favicon/Eshop.png" alt="E-shop Logo" className="h-7 w-auto object-contain" />
-              <button onClick={() => setMobile(false)} className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-xl transition-colors">
+              <div className="relative w-[100px] h-[28px]">
+                <Image src="/Logo+%20favicon/Eshop.png" alt="E-shop Logo" fill sizes="100px" className="object-contain" />
+              </div>
+              <button onClick={() => setMobile(false)} className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-xl transition-colors" aria-label="Close menu">
                 <Icon.Close />
               </button>
             </div>

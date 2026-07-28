@@ -4,10 +4,11 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import {
   LayoutDashboard, Package, ShoppingCart, Users, BarChart3,
-  Settings, Bell, LogOut, Search, Tag, Globe,
+  Settings, Bell, LogOut, Search, Tag, Globe, Shield,
   Warehouse, Mail, ChevronDown, ChevronRight, Store,
-  X, Menu, AlertTriangle, UserPlus, Check,
+  X, Menu, AlertTriangle, UserPlus, Check, MapPin
 } from "lucide-react";
+import { useSettings } from "@/lib/SettingsContext";
 
 const NOTIF_ICON: Record<string, typeof Bell> = {
   "shopping-cart": ShoppingCart, "alert-triangle": AlertTriangle,
@@ -31,15 +32,18 @@ const NAV = [
   { href:"/admin/products",    icon:Package,         label:"Products",    badge:null },
   { href:"/admin/inventory",   icon:Warehouse,       label:"Inventory",   badge:"12" },
   { href:"/admin/customers",   icon:Users,           label:"Customers",   badge:null },
+  { href:"/admin/countries",   icon:MapPin,          label:"Countries",   badge:null },
   { href:"/admin/promotions",  icon:Tag,             label:"Promotions",  badge:null },
   { href:"/admin/seo",         icon:Globe,           label:"SEO",         badge:null },
   { href:"/admin/crm",         icon:Mail,            label:"CRM & Email", badge:null },
   { href:"/admin/analytics",   icon:BarChart3,       label:"Analytics",   badge:null },
+  { href:"/admin/firewall",    icon:Shield,          label:"Firewall",    badge:null },
   { href:"/admin/settings",    icon:Settings,        label:"Settings",    badge:null },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const path = usePathname();
+  const { settings } = useSettings();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [adminName, setAdminName] = useState("Aquib");
@@ -48,19 +52,33 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [readIds, setReadIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
+    try {
+      const saved = localStorage.getItem("admin_read_notifs");
+      if (saved) setReadIds(new Set(JSON.parse(saved)));
+    } catch {}
+  }, []);
+
+  const saveReadIds = (newSet: Set<string>) => {
+    setReadIds(newSet);
+    try {
+      localStorage.setItem("admin_read_notifs", JSON.stringify(Array.from(newSet)));
+    } catch {}
+  };
+
+  useEffect(() => {
     fetch("/api/auth/admin").then(r=>r.json()).then(d=>{ if(d.admin?.name) setAdminName(d.admin.name); }).catch(()=>{});
   },[]);
 
-  // Poll notifications every 30s
+  // Poll notifications every 5s
   useEffect(() => {
     const load = () => fetch("/api/admin/notifications").then(r=>r.json()).then(d=>setNotifs(d.notifications??[])).catch(()=>{});
     load();
-    const t = setInterval(load, 30000);
+    const t = setInterval(load, 5000);
     return () => clearInterval(t);
   }, []);
 
   const unreadCount = notifs.filter(n => !readIds.has(n.id)).length;
-  const markAllRead = () => setReadIds(new Set(notifs.map(n=>n.id)));
+  const markAllRead = () => saveReadIds(new Set(notifs.map(n=>n.id)));
 
   const logout = async () => {
     await fetch("/api/auth/admin", { method:"DELETE" });
@@ -76,7 +94,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
         {!collapsed && (
           <div>
-            <p className="font-display font-black text-white text-base leading-none">E-shop</p>
+            <p className="font-display font-black text-white text-base leading-none">{settings.store_name || "E-shop"}</p>
             <p className="text-[10px] text-neutral-500 font-bold tracking-widest uppercase mt-0.5">Admin</p>
           </div>
         )}
@@ -133,6 +151,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </div>
     </>
   );
+
+  if (path === "/admin/login") {
+    return <>{children}</>;
+  }
 
   return (
     <div className="admin-scope min-h-screen bg-neutral-100 dark:bg-neutral-950 flex">
@@ -222,7 +244,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         const unread = !readIds.has(n.id);
                         const tone = n.type==="stock" ? "#f59e0b" : n.type==="order" ? "#e02020" : n.type==="customer" ? "#22c55e" : "#3b82f6";
                         return (
-                          <Link key={n.id} href={n.href} onClick={()=>{setNotifOpen(false);setReadIds(prev=>new Set(prev).add(n.id));}}
+                          <Link key={n.id} href={n.href} onClick={()=>{setNotifOpen(false); saveReadIds(new Set(readIds).add(n.id));}}
                             className={`flex gap-3 px-4 py-3 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors border-b border-neutral-50 dark:border-neutral-800/50 ${unread?"bg-[#e02020]/[0.03]":""}`}>
                             <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{background:`${tone}18`}}>
                               <Icon size={14} style={{color:tone}}/>

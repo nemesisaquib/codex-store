@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 
 const categories = [
@@ -61,15 +62,16 @@ export default function CategoryStrip() {
           <Link
             key={cat.label}
             href={cat.href}
+            aria-label={`Shop ${cat.label} category`}
             className="category-card relative overflow-hidden rounded-2xl aspect-[4/5] block group shadow-sm hover:shadow-xl transition-all duration-500 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200/60 dark:border-neutral-800"
           >
             {/* Image */}
-            <img
+            <Image
               src={cat.image}
-              alt={cat.label}
-              loading="lazy"
-              onError={(e) => { e.currentTarget.style.opacity = "0.5"; }}
-              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              alt={`${cat.label} collection`}
+              fill
+              sizes="(max-width: 768px) 50vw, 25vw"
+              className="object-cover transition-transform duration-700 group-hover:scale-105"
             />
 
             {/* Bottom Vignette Gradient overlay */}

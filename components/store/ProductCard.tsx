@@ -1,10 +1,12 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Heart, ShoppingBag, Star, Eye } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import QuickView from "./QuickView";
+import { useSettings } from "@/lib/SettingsContext";
 
 export interface Product {
   id:           string;
@@ -29,6 +31,7 @@ export interface Product {
 }
 
 export default function ProductCard({ product }: { product: Product }) {
+  const { formatPrice } = useSettings();
   const router = useRouter();
   const [wishlisted, setWishlisted] = useState(false);
   const [hovered, setHovered]       = useState(false);
@@ -59,21 +62,23 @@ export default function ProductCard({ product }: { product: Product }) {
         {hasImg && (
           <>
             {/* Primary image */}
-            <img
+            <Image
               src={product.image}
-              alt={product.name}
-              loading="lazy"
-              onError={(e) => { e.currentTarget.style.display = "none"; }}
-              className={`absolute inset-0 w-full h-full object-contain p-4 transition-all duration-500 ${hovered && product.image2 ? "opacity-0" : "opacity-100"} group-hover:scale-105`}
+              alt={product.name || "Product Image"}
+              fill
+              unoptimized
+              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+              className={`object-contain p-4 transition-all duration-500 ${hovered && product.image2 ? "opacity-0" : "opacity-100"} group-hover:scale-105`}
             />
             {/* Hover image */}
             {product.image2 && (
-              <img
+              <Image
                 src={product.image2}
-                alt={`${product.name} alternate`}
-                loading="lazy"
-                onError={(e) => { e.currentTarget.style.display = "none"; }}
-                className={`absolute inset-0 w-full h-full object-contain p-4 transition-all duration-500 ${hovered ? "opacity-100" : "opacity-0"} group-hover:scale-105`}
+                alt={`${product.name || "Product"} alternate`}
+                fill
+                unoptimized
+                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                className={`object-contain p-4 transition-all duration-500 ${hovered ? "opacity-100" : "opacity-0"} group-hover:scale-105`}
               />
             )}
           </>
@@ -132,7 +137,7 @@ export default function ProductCard({ product }: { product: Product }) {
                 cart.push({ productId: product.id, name: product.name, qty: 1, price: product.price, image: product.image });
                 const res = await fetch("/api/cart", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items: cart }) });
                 if (res.ok) {
-                  toast.success("Added to bag", { description: `${product.name} — $${product.price.toFixed(2)}` });
+                  toast.success("Added to bag", { description: `${product.name} — £${product.price.toFixed(2)}` });
                 } else if (res.status === 401) {
                   toast.error("Please sign in", { description: "Log in to add items to your bag." });
                 }
@@ -142,9 +147,10 @@ export default function ProductCard({ product }: { product: Product }) {
               setAdding(false);
             }}
             disabled={adding}
-            className={`flex-1 ${adding ? "bg-neutral-600" : "bg-neutral-900/90 hover:bg-[#e02020]"} backdrop-blur-sm text-white text-xs font-semibold py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-colors`}
+            className={`flex-1 ${adding ? "bg-neutral-600" : "bg-[#e02020] hover:bg-[#c01a1a] shadow-lg shadow-[#e02020]/20"} text-white text-xs font-bold py-3 rounded-xl flex items-center justify-center gap-1.5 transition-all uppercase tracking-wider`}
+            aria-label={`Add ${product.name} to bag`}
           >
-            <ShoppingBag size={13}/> {adding ? "Adding…" : "Quick Add"}
+            <ShoppingBag size={14}/> {adding ? "Adding…" : "Quick Add"}
           </button>
           <button
             onClick={e => { e.preventDefault(); setQuickViewOpen(true); }}
@@ -180,9 +186,9 @@ export default function ProductCard({ product }: { product: Product }) {
 
         {/* Price */}
         <div className="flex items-center gap-2">
-          <span className="text-base font-bold text-neutral-900 dark:text-white">${product.price.toFixed(2)}</span>
+          <span className="text-base font-bold text-neutral-900 dark:text-white">£{product.price.toFixed(2)}</span>
           {product.comparePrice && (
-            <span className="text-xs text-neutral-400 line-through">${product.comparePrice.toFixed(2)}</span>
+            <span className="text-xs text-neutral-400 line-through">£{product.comparePrice.toFixed(2)}</span>
           )}
         </div>
 

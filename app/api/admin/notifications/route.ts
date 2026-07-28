@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 
+export const dynamic = 'force-dynamic';
+
 interface Notif {
   id: string; type: string; title: string; body: string;
   time: string; href: string; icon: string;
@@ -23,13 +25,13 @@ export async function GET() {
     }
 
     // Low stock alerts
-    const low = (await db.execute("SELECT id,name,stock FROM products WHERE stock<=10 AND status='active' ORDER BY stock ASC LIMIT 5")).rows as {id:string;name:string;stock:number}[];
+    const low = (await db.execute("SELECT id,name,stock,created_at FROM products WHERE stock<=10 AND status='active' ORDER BY stock ASC LIMIT 5")).rows as {id:string;name:string;stock:number;created_at:string}[];
     for (const p of low) {
       notifs.push({
         id: `stock-${p.id}`, type: "stock",
         title: p.stock === 0 ? `${p.name} is out of stock` : `Low stock: ${p.name}`,
         body: `${p.stock} unit${p.stock===1?"":"s"} remaining`,
-        time: new Date().toISOString(), href: "/admin/inventory", icon: "alert-triangle",
+        time: p.created_at || new Date().toISOString(), href: "/admin/inventory", icon: "alert-triangle",
       });
     }
 

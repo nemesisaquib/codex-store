@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Search, Download, Eye, X, Truck, CheckCircle, Package, Clock } from "lucide-react";
+import { Search, Download, Eye, X, Truck, CheckCircle, Package, Clock, RefreshCw } from "lucide-react";
 
 interface Order {
   id:string; order_number:string; customer_name:string; customer_email:string;
@@ -22,42 +22,68 @@ export default function AdminOrdersPage() {
   const [filter, setFilter]     = useState("all");
   const [search, setSearch]     = useState("");
   const [loading, setLoading]   = useState(true);
+  const [livePolling, setLive]  = useState(false);
   const [selected, setSelected] = useState<Order|null>(null);
   const [updating, setUpdating] = useState(false);
 
-  const load = () => {
-    setLoading(true);
-    const p = new URLSearchParams({limit:"50"});
-    if (filter !== "all") p.set("status", filter);
-    fetch(`/api/orders?${p}`)
-      .then(r=>r.json())
-      .then(d => {
-        const list = (d.orders ?? []) as Order[];
-        setOrders(search ? list.filter(o=>o.order_number.includes(search)||o.customer_name?.toLowerCase().includes(search.toLowerCase())) : list);
-        setTotal(d.total ?? 0);
-        setLoading(false);
-      });
+  const fetchOrders = async (silent = false) => {
+    if (!silent) setLoading(true);
+    else setLive(true);
+    try {
+      const p = new URLSearchParams({ limit: "50" });
+      if (filter !== "all") p.set("status", filter);
+      const d = await fetch(`/api/orders?${p}`).then(r => r.json());
+      const list = (d.orders ?? []) as Order[];
+      setOrders(search ? list.filter(o => o.order_number.includes(search) || o.customer_name?.toLowerCase().includes(search.toLowerCase())) : list);
+      setTotal(d.total ?? 0);
+    } catch (e) {
+      console.error("Failed to load orders:", e);
+    } finally {
+      setLoading(false);
+      setLive(false);
+    }
   };
-  useEffect(load, [filter, search]);
+
+  // Initial load when filter/search changes
+  useEffect(() => { fetchOrders(); }, [filter, search]);
+
+  // Silent background polling every 10 seconds
+  useEffect(() => {
+    const id = setInterval(() => fetchOrders(true), 10_000);
+    return () => clearInterval(id);
+  }, [filter, search]);
 
   const updateStatus = async (id: string, status: string) => {
     setUpdating(true);
     await fetch(`/api/orders/${id}`, { method:"PATCH", headers:{"Content-Type":"application/json"}, body:JSON.stringify({status}) });
     setUpdating(false);
     if (selected?.id === id) setSelected(prev => prev ? {...prev, status} : null);
-    load();
+    fetchOrders();
   };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display font-bold text-2xl text-neutral-900 dark:text-white">Orders</h1>
-          <p className="text-xs text-neutral-400 mt-0.5">{total} total · SQLite</p>
+          <h1 className="font-display font-bold text-2xl text-neutral-900 dark:text-white flex items-center gap-2">
+            Orders
+            {livePolling && (
+              <span className="flex h-2 w-2 relative" title="Polling for updates…">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              </span>
+            )}
+          </h1>
+          <p className="text-xs text-neutral-400 mt-0.5">{total} total · live updates every 10s</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2.5 border border-neutral-200 dark:border-neutral-700 rounded-xl text-sm font-medium hover:border-[#e02020] transition-colors">
-          <Download size={14}/> Export CSV
-        </button>
+        <div className="flex items-center gap-3">
+          <button onClick={() => fetchOrders()} disabled={loading} className="p-2.5 bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-neutral-600 dark:text-neutral-300 rounded-xl transition-colors" title="Refresh Orders">
+            <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
+          </button>
+          <button className="flex items-center gap-2 px-4 py-2.5 border border-neutral-200 dark:border-neutral-700 rounded-xl text-sm font-medium hover:border-[#e02020] transition-colors">
+            <Download size={14}/> Export CSV
+          </button>
+        </div>
       </div>
 
       {/* Status tabs */}

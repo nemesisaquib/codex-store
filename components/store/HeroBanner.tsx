@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 
 export default function HeroBanner() {
@@ -41,8 +42,15 @@ export default function HeroBanner() {
       <section className="hero-banner-section">
         {categories.map((c, i) => (
           <div key={i} className="group relative w-full md:w-1/3 h-[300px] md:h-full overflow-hidden border-b md:border-b-0 md:border-r border-neutral-900/10 last:border-0">
-            <Link href={c.href} className="block w-full h-full relative">
-              <img src={c.image} alt={c.title} className="w-full h-full object-cover object-center transition-transform duration-1000 group-hover:scale-105" />
+            <Link href={c.href} className="block w-full h-full relative" aria-label={`Shop ${c.title}`}>
+              <Image 
+                src={c.image} 
+                alt={c.title} 
+                fill 
+                sizes="(max-width: 768px) 100vw, 33vw"
+                priority
+                className="object-cover object-center transition-transform duration-1000 group-hover:scale-105" 
+              />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
               
               <div className="absolute bottom-6 left-6 md:bottom-8 md:left-8 md:right-8 flex items-end justify-between z-10">

@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Plus, Search, Edit2, Trash2, Eye, X, Check } from "lucide-react";
+import { Plus, Search, Edit2, Trash2, Eye, X, Check, RefreshCw } from "lucide-react";
 import CloudinaryUpload from "@/components/admin/CloudinaryUpload";
 
 interface Product {
@@ -74,9 +74,14 @@ export default function AdminProductsPage() {
           <h1 className="font-display font-bold text-2xl text-neutral-900 dark:text-white">Products</h1>
           <p className="text-xs text-neutral-400 mt-0.5">{total} total · SQLite</p>
         </div>
-        <button onClick={openAdd} className="flex items-center gap-2 px-4 py-2.5 bg-[#e02020] hover:bg-[#c01a1a] text-white text-sm font-semibold rounded-xl transition-colors">
-          <Plus size={15}/> Add Product
-        </button>
+        <div className="flex items-center gap-3">
+          <button onClick={load} disabled={loading} className="p-2.5 bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-neutral-600 dark:text-neutral-300 rounded-xl transition-colors" title="Refresh Products">
+            <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
+          </button>
+          <button onClick={openAdd} className="flex items-center gap-2 px-4 py-2.5 bg-[#e02020] hover:bg-[#c01a1a] text-white text-sm font-semibold rounded-xl transition-colors">
+            <Plus size={15}/> Add Product
+          </button>
+        </div>
       </div>
 
       <div className="bg-white dark:bg-neutral-900 rounded-2xl overflow-hidden">

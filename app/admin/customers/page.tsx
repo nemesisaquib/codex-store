@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Search, Download, Star, Eye, X, Mail, MapPin, ShoppingBag, Award } from "lucide-react";
+import { Search, Download, Star, Eye, X, Mail, MapPin, ShoppingBag, Award, RefreshCw } from "lucide-react";
 
 interface Customer {
   id:string; first_name:string; last_name:string; email:string; phone:string;
@@ -53,9 +53,14 @@ export default function AdminCustomersPage() {
           <h1 className="font-display font-bold text-2xl text-neutral-900 dark:text-white">Customers</h1>
           <p className="text-xs text-neutral-400 mt-0.5">{total} total · SQLite</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2.5 border border-neutral-200 dark:border-neutral-700 rounded-xl text-sm font-medium hover:border-[#e02020] transition-colors">
-          <Download size={14}/> Export CSV
-        </button>
+        <div className="flex items-center gap-3">
+          <button onClick={load} disabled={loading} className="p-2.5 bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-neutral-600 dark:text-neutral-300 rounded-xl transition-colors" title="Refresh Customers">
+            <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
+          </button>
+          <button className="flex items-center gap-2 px-4 py-2.5 border border-neutral-200 dark:border-neutral-700 rounded-xl text-sm font-medium hover:border-[#e02020] transition-colors">
+            <Download size={14}/> Export CSV
+          </button>
+        </div>
       </div>
 
       {/* Tier filter */}

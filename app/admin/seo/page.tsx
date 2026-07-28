@@ -52,7 +52,7 @@ export default function AdminSeoPage() {
   const filteredProducts = products.filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
 
   return (
-    <div className="space-y-6 max-w-5xl">
+    <div className="space-y-6 w-full">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="font-display font-bold text-2xl text-neutral-900 dark:text-white">SEO Manager</h1>

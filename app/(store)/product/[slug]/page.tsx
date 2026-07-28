@@ -3,9 +3,10 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Heart, ShoppingBag, Star, Shield, RotateCcw, Truck, ChevronDown, ChevronUp, Share2 } from "lucide-react";
+import { Heart, ShoppingBag, Star, Shield, RotateCcw, Truck, ChevronDown, ChevronUp, Share2, MapPin } from "lucide-react";
 import ProductCard from "@/components/store/ProductCard";
 import { toProduct, type ApiProduct } from "@/lib/api";
+import { useCountry } from "@/lib/CountryContext";
 
 const SIZES = ["XS","S","M","L","XL","XXL"];
 
@@ -13,15 +14,20 @@ interface Review { id:string; rating:number; title:string|null; comment:string|n
 
 export default function ProductPage() {
   const { slug } = useParams<{ slug: string }>();
+  const { country } = useCountry();
   const [product, setProduct]   = useState<ApiProduct | null>(null);
   const [related, setRelated]   = useState<ReturnType<typeof toProduct>[]>([]);
   const [loading, setLoading]   = useState(true);
-  const [size, setSize]         = useState("");
+  const [isAdding, setIsAdding] = useState(false);
+  const [size, setSize]         = useState<string | null>(null);
   const [qty, setQty]           = useState(1);
   const [wishlisted, setWish]   = useState(false);
   const [expanded, setExpanded] = useState<string|null>("description");
   const [activeImg, setActiveImg] = useState(0);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [pinCode, setPinCode] = useState("");
+  const [pinStatus, setPinStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [locationName, setLocationName] = useState("");
 
   useEffect(() => {
     fetch(`/api/products/${slug}`)
@@ -100,29 +106,30 @@ export default function ProductPage() {
           ))}
         </nav>
 
-        <div className="grid lg:grid-cols-2 gap-12 xl:gap-20">
+        <div className="grid lg:grid-cols-2 gap-12 xl:gap-20 items-start">
           {/* Images */}
-          <div className="flex gap-4">
+          <div className="flex gap-4 lg:sticky lg:top-[120px] lg:h-fit">
             {/* Thumbnails — gradient bg always, image overlay (broken img reveals gradient) */}
             <div className="hidden md:flex flex-col gap-3">
               {(gallery.length ? gallery : bgs).map((g,i) => (
                 <button key={i} onClick={() => setActiveImg(i)}
-                  className={`w-20 h-24 rounded-xl flex-shrink-0 border-2 overflow-hidden transition-all relative ${activeImg===i?"border-[#e02020]":"border-transparent hover:border-neutral-300"}`}
-                  style={{ background: bgs[i % bgs.length] }}>
+                  className={`w-20 h-24 rounded-xl flex-shrink-0 border-2 overflow-hidden transition-all relative ${activeImg===i?"border-[#e02020]":"border-transparent hover:border-neutral-300"} ${gallery.length > 0 ? "bg-neutral-100 dark:bg-neutral-900" : ""}`}
+                  style={gallery.length > 0 ? {} : { background: bgs[i % bgs.length] }}>
                   {gallery.length > 0 && (
-                    <img src={g} alt="" className="absolute inset-0 w-full h-full object-contain p-1" onError={e=>(e.currentTarget.style.display="none")}/>
+                    <img src={g} alt="" className="absolute inset-0 w-full h-full object-cover object-center" onError={e=>(e.currentTarget.style.display="none")}/>
                   )}
                 </button>
               ))}
             </div>
-            {/* Main image — gradient always behind, real image overlays */}
-            <div className="flex-1 rounded-2xl overflow-hidden aspect-[4/5] relative" style={{ background: bgs[activeImg % bgs.length] }}>
+            {/* Main image */}
+            <div className={`flex-1 rounded-2xl overflow-hidden aspect-[4/5] relative ${gallery.length > 0 ? "bg-neutral-100 dark:bg-neutral-900" : ""}`} 
+                 style={gallery.length > 0 ? {} : { background: bgs[activeImg % bgs.length] }}>
               {gallery.length > 0 && (
                 <img
                   key={gallery[activeImg] ?? gallery[0]}
                   src={gallery[activeImg] ?? gallery[0]}
                   alt={product.name}
-                  className="absolute inset-0 w-full h-full object-contain p-8"
+                  className="absolute inset-0 w-full h-full object-cover object-center"
                   onError={e=>(e.currentTarget.style.display="none")}
                 />
               )}
@@ -169,8 +176,8 @@ export default function ProductPage() {
             </div>
 
             <div className="flex items-center gap-3 mb-7">
-              <span className="font-display font-bold text-3xl text-neutral-900 dark:text-white">${product.price.toFixed(2)}</span>
-              {product.compare_price && <span className="text-lg text-neutral-400 line-through">${product.compare_price.toFixed(2)}</span>}
+              <span className="font-display font-bold text-3xl text-neutral-900 dark:text-white">£{product.price.toFixed(2)}</span>
+              {product.compare_price && <span className="text-lg text-neutral-400 line-through">£{product.compare_price.toFixed(2)}</span>}
               {discount && <span className="badge-sale bg-[#e02020] text-white text-xs font-bold px-2.5 py-1 rounded-full">-{discount}%</span>}
             </div>
 
@@ -194,10 +201,14 @@ export default function ProductPage() {
                 <p className="text-xs font-bold tracking-wider uppercase text-neutral-600 dark:text-neutral-400">Size</p>
                 <button className="text-xs text-[#e02020] hover:underline">Size guide</button>
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-3">
                 {SIZES.map(s => (
                   <button key={s} onClick={() => setSize(s)}
-                    className={`px-4 py-2.5 border rounded-xl text-sm font-medium transition-all ${size===s?"border-[#e02020] bg-[#e02020]/10 text-[#e02020]":"border-neutral-200 dark:border-neutral-700 hover:border-[#e02020]"}`}>
+                    className={`min-w-[3.5rem] h-12 px-4 border rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center ${
+                      size === s 
+                      ? "border-neutral-900 bg-neutral-900 text-white dark:border-white dark:bg-white dark:text-neutral-900 shadow-md scale-105" 
+                      : "border-neutral-200 text-neutral-600 hover:border-neutral-900 hover:text-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:hover:border-white dark:hover:text-white"
+                    }`}>
                     {s}
                   </button>
                 ))}
@@ -212,29 +223,113 @@ export default function ProductPage() {
                 <button onClick={() => setQty(qty+1)} className="px-4 py-3 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors text-lg font-medium">+</button>
               </div>
               <button
+                disabled={isAdding}
                 onClick={async () => {
                   if (!size) { toast.error("Select a size", { description: "Please choose a size before adding to bag." }); return; }
+                  setIsAdding(true);
                   try {
-                    const cart = await fetch("/api/cart").then(r => r.json()).then(d => d.items ?? []);
-                    cart.push({ productId: product.id, name: `${product.name} (${size})`, qty, price: product.price, image: product.image_url ?? undefined });
+                    const cart: Array<{ productId: string; name: string; qty: number; price: number; image?: string }> = await fetch("/api/cart").then(r => r.json()).then(d => d.items ?? []);
+                    const itemName = `${product.name} (${size})`;
+                    const existingIdx = cart.findIndex(i => i.name === itemName);
+                    if (existingIdx > -1) {
+                      cart[existingIdx].qty += qty;
+                    } else {
+                      cart.push({ productId: product.id, name: itemName, qty, price: product.price, image: product.image_url ?? undefined });
+                    }
                     const res = await fetch("/api/cart", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items: cart }) });
-                    if (res.ok) toast.success("Added to bag", { description: `${product.name} · Size ${size} · Qty ${qty}` });
-                    else if (res.status === 401) toast.error("Please sign in", { description: "Log in to add items to your bag." });
+                    if (res.ok) {
+                      toast.success("Added to bag", { description: `${product.name} · Size ${size} · Qty ${qty}` });
+                      window.dispatchEvent(new Event("cart-updated"));
+                    } else if (res.status === 401) {
+                      toast.error("Please sign in", { description: "Log in to add items to your bag." });
+                    }
                   } catch { toast.error("Something went wrong"); }
+                  finally { setIsAdding(false); }
                 }}
-                className="flex-1 bg-[#e02020] hover:bg-[#c01a1a] text-white font-semibold rounded-xl py-3 text-sm transition-colors flex items-center justify-center gap-2"
+                className="flex-1 bg-[#e02020] hover:bg-[#c01a1a] text-white font-semibold rounded-xl py-3 text-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                <ShoppingBag size={17}/> Add to bag
+                {isAdding ? (
+                  <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                ) : (
+                  <><ShoppingBag size={17}/> Add to bag</>
+                )}
               </button>
+            </div>
+
+            {/* Delivery Checker */}
+            <div className="mb-8 p-5 border border-neutral-200 dark:border-neutral-800 rounded-xl bg-white dark:bg-neutral-950 shadow-sm">
+              <div className="flex items-center gap-2 mb-3">
+                <MapPin size={18} className="text-[#e02020]" />
+                <h3 className="font-semibold text-sm text-neutral-900 dark:text-white">Check Delivery Availability</h3>
+              </div>
+              <p className="text-xs text-neutral-500 mb-4">Enter your ZIP / PIN code for worldwide delivery estimates.</p>
+              
+              <div className="flex gap-2">
+                <input 
+                  type="text" 
+                  placeholder="Enter PIN Code" 
+                  value={pinCode}
+                  onChange={(e) => { setPinCode(e.target.value); setPinStatus("idle"); }}
+                  className="flex-1 px-4 py-2.5 bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg text-sm focus:outline-none focus:border-neutral-900 dark:focus:border-white transition-colors"
+                />
+                <button 
+                  onClick={async () => {
+                    if (!pinCode) return;
+                    setPinStatus("loading");
+                    try {
+                      const res = await fetch(`/api/geocode?pin=${encodeURIComponent(pinCode)}&country=${encodeURIComponent(country.code)}`);
+                      const data = await res.json();
+                      if (data?.error) {
+                        setPinStatus("error");
+                        setLocationName(`Invalid PIN code for ${country.name}`);
+                      } else if (data && data.location) {
+                        setLocationName(data.location);
+                        setPinStatus("success");
+                      } else {
+                        setLocationName(pinCode);
+                        setPinStatus("success");
+                      }
+                    } catch {
+                      setLocationName(pinCode);
+                      setPinStatus("success");
+                    }
+                  }}
+                  disabled={!pinCode || pinStatus === "loading"}
+                  className="px-5 py-2.5 bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 font-semibold text-sm rounded-lg hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors disabled:opacity-50"
+                >
+                  {pinStatus === "loading" ? "Checking..." : "Check"}
+                </button>
+              </div>
+
+              {/* Success / Error Messages */}
+              {pinStatus === "success" && (
+                <div className="mt-4 flex gap-3 p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-900/40 rounded-lg animate-in fade-in slide-in-from-top-2">
+                  <Truck size={18} className="text-green-600 mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-sm font-semibold text-green-900 dark:text-green-50 mb-0.5">Delivery available to {locationName}</p>
+                    <p className="text-xs text-green-700 dark:text-green-400">Order now to receive it in 3-5 business days. Worldwide shipping is active.</p>
+                  </div>
+                </div>
+              )}
+
+              {pinStatus === "error" && (
+                <div className="mt-4 flex gap-3 p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/40 rounded-lg animate-in fade-in slide-in-from-top-2">
+                  <MapPin size={18} className="text-red-600 mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-sm font-semibold text-red-900 dark:text-red-50 mb-0.5">{locationName}</p>
+                    <p className="text-xs text-red-700 dark:text-red-400">Please verify your PIN code or select a different country from the top menu.</p>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Trust */}
             <div className="grid grid-cols-3 gap-3 mb-8 p-4 bg-neutral-50 dark:bg-neutral-900 rounded-xl">
-              {[[Truck,"Free Delivery","Orders over $150"],[RotateCcw,"Free Returns","30 days"],[Shield,"Secure Pay","PCI DSS L1"]].map(([Icon,t,s])=>(
-                <div key={t as string} className="text-center">
-                  <div className="flex justify-center mb-1">{typeof Icon==="function"&&<Icon size={18} className="text-[#e02020]"/>}</div>
-                  <p className="text-xs font-semibold text-neutral-900 dark:text-white">{t as string}</p>
-                  <p className="text-[10px] text-neutral-400">{s as string}</p>
+              {[[Truck,"Free Delivery","Orders over $150"],[RotateCcw,"Free Returns","30 days"],[Shield,"Secure Pay","PCI DSS L1"]].map(([Icon,t,s]: any)=>(
+                <div key={t} className="text-center flex flex-col items-center">
+                  <div className="flex justify-center mb-1.5"><Icon size={20} className="text-[#e02020]"/></div>
+                  <p className="text-xs font-semibold text-neutral-900 dark:text-white">{t}</p>
+                  <p className="text-[10px] text-neutral-400 mt-0.5">{s}</p>
                 </div>
               ))}
             </div>
@@ -247,7 +342,7 @@ export default function ProductPage() {
             ].map(({k,t,c}) => (
               <div key={k} className="border-b border-neutral-200 dark:border-neutral-800">
                 <button onClick={() => setExpanded(expanded===k?null:k)}
-                  className="flex items-center justify-between w-full py-4 text-sm font-semibold text-neutral-900 dark:text-white">
+                  className="flex items-center justify-between w-full py-4 text-sm font-semibold text-neutral-900 dark:text-white cursor-pointer hover:opacity-80 transition-opacity">
                   {t} {expanded===k?<ChevronUp size={16}/>:<ChevronDown size={16}/>}
                 </button>
                 {expanded===k && <p className="pb-4 text-sm text-neutral-500 leading-relaxed">{c}</p>}

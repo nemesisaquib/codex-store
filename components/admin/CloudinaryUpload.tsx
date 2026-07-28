@@ -48,6 +48,7 @@ export default function CloudinaryUpload({ mode = "single", value, onChange, lab
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState("");
   const [drag, setDrag] = useState(false);
+  const [fileSizes, setFileSizes] = useState<Record<string, string>>({});
 
   const images = mode === "multiple" ? (Array.isArray(value) ? value : []) : (value ? [value as string] : []);
 
@@ -60,12 +61,20 @@ export default function CloudinaryUpload({ mode = "single", value, onChange, lab
     try {
       const toUpload = mode === "single" ? [files[0]] : Array.from(files);
       const urls: string[] = [];
+      const newSizes: Record<string, string> = {};
+      
       for (const file of toUpload) {
         if (!file.type.startsWith("image/")) { setError("Only image files allowed"); continue; }
         if (file.size > 10 * 1024 * 1024) { setError(`${file.name} exceeds 10MB`); continue; }
+        
+        const sizeStr = (file.size / 1024).toFixed(1) + " KB";
         const url = await uploadToCloudinary(file, setProgress);
         urls.push(url);
+        newSizes[url] = sizeStr;
       }
+      
+      setFileSizes(prev => ({ ...prev, ...newSizes }));
+
       if (mode === "single") {
         if (urls[0]) onChange(urls[0]);
       } else {
@@ -154,6 +163,14 @@ export default function CloudinaryUpload({ mode = "single", value, onChange, lab
               />
               {/* Dark overlay on hover */}
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-200 rounded-xl" />
+              
+              {/* Display File Size if available */}
+              {fileSizes[url] && (
+                <div className="absolute top-1.5 left-1.5 bg-black/60 text-white text-[9px] font-medium px-1.5 py-0.5 rounded-md backdrop-blur-sm">
+                  {fileSizes[url]}
+                </div>
+              )}
+
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); removeImage(i); }}

@@ -24,12 +24,22 @@ const S: Record<string,string> = {
 export default function AdminDashboard() {
   const [stats, setStats]   = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [livePolling, setLive] = useState(false);
 
-  const load = () => {
-    setLoading(true);
-    fetch("/api/admin/stats").then(r=>r.json()).then(d => { setStats(d); setLoading(false); });
+  const load = async (silent = false) => {
+    if (!silent) setLoading(true); else setLive(true);
+    try {
+      const d = await fetch("/api/admin/stats").then(r => r.json());
+      setStats(d);
+    } catch {}
+    setLoading(false); setLive(false);
   };
-  useEffect(load, []);
+
+  useEffect(() => {
+    load();
+    const id = setInterval(() => load(true), 5000);
+    return () => clearInterval(id);
+  }, []);
 
   const cards = [
     {label:"Total Revenue",  value:stats?`$${stats.totalRevenue.toLocaleString(undefined,{maximumFractionDigits:0})}`:"—", sub:`$${(stats?.todayRevenue??0).toFixed(0)} today`, icon:TrendingUp,   color:"#e02020", up:true},
@@ -42,10 +52,18 @@ export default function AdminDashboard() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display font-bold text-2xl text-neutral-900 dark:text-white">Dashboard</h1>
+          <h1 className="font-display font-bold text-2xl text-neutral-900 dark:text-white flex items-center gap-2">
+            Dashboard
+            {livePolling && (
+              <span className="flex h-2 w-2 relative" title="Live — polling every 5s">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"/>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"/>
+              </span>
+            )}
+          </h1>
           <p className="text-neutral-500 text-sm mt-0.5">{new Date().toLocaleDateString("en-GB",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}</p>
         </div>
-        <button onClick={load} className="flex items-center gap-2 px-4 py-2 border border-neutral-200 dark:border-neutral-700 rounded-xl text-sm hover:border-[#e02020] transition-colors">
+        <button onClick={() => load()} className="flex items-center gap-2 px-4 py-2 border border-neutral-200 dark:border-neutral-700 rounded-xl text-sm hover:border-[#e02020] transition-colors">
           <RefreshCw size={13} className={loading?"animate-spin":""}/> Refresh
         </button>
       </div>

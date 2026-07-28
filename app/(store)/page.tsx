@@ -8,8 +8,8 @@ import NewArrivalsCarousel from "@/components/store/NewArrivalsCarousel";
 import BrandStory        from "@/components/store/BrandStory";
 import { getPageMetadata } from "@/lib/seo";
 
-export function generateMetadata(): Metadata {
-  return getPageMetadata("/");
+export async function generateMetadata(): Promise<Metadata> {
+  return await getPageMetadata("/");
 }
 
 export default function HomePage() {
