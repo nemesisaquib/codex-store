@@ -3,8 +3,8 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import { Play, Pause, Volume2, VolumeX, ArrowRight } from "lucide-react";
 
-// Reliable free stock video (Google sample CDN — hotlink-safe, always up)
-const VIDEO_SRC = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4";
+// Reliable free stock fashion video from Mixkit
+const VIDEO_SRC = "https://assets.mixkit.co/videos/preview/mixkit-girl-in-a-fashion-photoshoot-in-a-studio-34493-large.mp4";
 const POSTER_BG = "linear-gradient(135deg,#1a1a1a 0%,#2d1818 50%,#3d0808 100%)";
 
 export default function VideoShowcase() {

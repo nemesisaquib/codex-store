@@ -17,10 +17,59 @@ export interface ApiProduct {
   reviews: number;
   colors: string;
   description: string | null;
+  variants: string | null;
+  options: string | null;
+  attributes: string | null;
+  sizes: string | null;
+  weight: number | null;
+  length: number | null;
+  width: number | null;
+  height: number | null;
+  meta_title: string | null;
+  meta_desc: string | null;
+  meta_keywords: string | null;
+}
+
+export interface Option {
+  name: string;
+  values: string[];
+}
+
+export interface Attribute {
+  key: string;
+  value: string;
+}
+
+export interface Variant {
+  id: string;
+  name: string;
+  price: number;
+  stock: number;
+}
+
+export function safeJsonArray<T = any>(val: any): T[] {
+  if (!val) return [];
+  let current = val;
+  let attempts = 0;
+  while (typeof current === "string" && attempts < 5) {
+    try {
+      const parsed = JSON.parse(current);
+      current = parsed;
+    } catch {
+      break;
+    }
+    attempts++;
+  }
+  return Array.isArray(current) ? current : [];
 }
 
 export function toProduct(p: ApiProduct) {
-  const colorList: string[] = (() => { try { return JSON.parse(p.colors); } catch { return []; } })();
+  const colorList: string[] = safeJsonArray(p.colors);
+  const sizeList: string[] = safeJsonArray(p.sizes);
+  const variantList: Variant[] = safeJsonArray(p.variants);
+  const optionList: Option[] = safeJsonArray(p.options);
+  const attributeList: Attribute[] = safeJsonArray(p.attributes);
+  
   return {
     id:           p.id,
     name:         p.name,
@@ -37,8 +86,19 @@ export function toProduct(p: ApiProduct) {
     badge:        p.badge ?? undefined,
     isNew:        p.is_new === 1,
     colors:       colorList,
+    sizes:        sizeList.length > 0 ? sizeList : ["XS","S","M","L","XL","XXL"], // fallback for old products
     description:  p.description ?? undefined,
     stock:        p.stock,
+    weight:       p.weight ?? undefined,
+    length:       p.length ?? undefined,
+    width:        p.width ?? undefined,
+    height:       p.height ?? undefined,
+    variants:     variantList,
+    options:      optionList,
+    attributes:   attributeList,
+    meta_title:   p.meta_title ?? undefined,
+    meta_desc:    p.meta_desc ?? undefined,
+    meta_keywords: p.meta_keywords ?? undefined,
   };
 }
 

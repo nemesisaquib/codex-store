@@ -3,13 +3,9 @@ import { useState, useRef, useEffect } from "react";
 import { useCountry, Country } from "@/lib/CountryContext";
 import { ChevronDown } from "lucide-react";
 
-function getFlagEmoji(countryCode: string) {
+function getFlagUrl(countryCode: string) {
   if (!countryCode) return "";
-  const codePoints = countryCode
-    .toUpperCase()
-    .split('')
-    .map(char =>  127397 + char.charCodeAt(0));
-  return String.fromCodePoint(...codePoints);
+  return `https://flagcdn.com/w20/${countryCode.toLowerCase()}.png`;
 }
 
 export default function CountrySelector() {
@@ -35,7 +31,7 @@ export default function CountrySelector() {
         onClick={() => setOpen(!open)}
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-sm font-medium text-neutral-800 dark:text-neutral-200"
       >
-        <span className="text-base leading-none">{getFlagEmoji(country.code)}</span>
+        <img src={getFlagUrl(country.code)} alt={country.name} className="w-5 h-auto rounded-[2px]" />
         <span className="hidden lg:block text-xs uppercase tracking-wide">{country.code}</span>
         <ChevronDown size={12} className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
       </button>
@@ -53,7 +49,7 @@ export default function CountrySelector() {
                 country.code === c.code ? "bg-neutral-50 dark:bg-neutral-800 font-semibold" : ""
               }`}
             >
-              <span className="text-base">{getFlagEmoji(c.code)}</span>
+              <span className="text-base"><img src={getFlagUrl(c.code)} alt={c.name} className="w-5 h-auto rounded-[2px]" /></span>
               <span className="text-neutral-900 dark:text-white truncate">{c.name}</span>
             </button>
           ))}

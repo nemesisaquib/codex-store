@@ -4,10 +4,12 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import Image from "next/image";
 import { X, ShoppingBag, Trash2, ArrowRight, Tag, Truck, Plus, Minus, Package, Sparkles } from "lucide-react";
+import { useSettings } from "@/lib/SettingsContext";
 
 interface CartItem { productId: string; name: string; qty: number; price: number; image?: string }
 
 export default function CartAside({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { formatPrice } = useSettings();
   const [items, setItems] = useState<CartItem[]>([]);
   const [promo, setPromo] = useState("");
   const [promoCode, setPromoCode] = useState<{ type: string; value: number; code: string } | null>(null);
@@ -33,8 +35,8 @@ export default function CartAside({ open, onClose }: { open: boolean; onClose: (
     return () => { document.removeEventListener("keydown", fn); document.body.style.overflow = ""; };
   }, [open, onClose]);
 
-  const update = useCallback((productId: string, qty: number) => {
-    setItems(p => qty < 1 ? p.filter(i => i.productId !== productId) : p.map(i => i.productId === productId ? { ...i, qty } : i));
+  const update = useCallback((name: string, qty: number) => {
+    setItems(p => qty < 1 ? p.filter(i => i.name !== name) : p.map(i => i.name === name ? { ...i, qty } : i));
   }, []);
 
   const applyPromo = async () => {
@@ -168,7 +170,7 @@ export default function CartAside({ open, onClose }: { open: boolean; onClose: (
                   <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
                     <div className="flex items-start justify-between gap-2">
                       <p className="text-[13px] font-medium text-neutral-900 dark:text-white leading-snug line-clamp-2">{item.name}</p>
-                      <button onClick={() => update(item.productId, 0)} aria-label={`Remove ${item.name}`}
+                      <button onClick={() => update(item.name, 0)} aria-label={`Remove ${item.name}`}
                         className="flex-shrink-0 p-1 text-neutral-300 hover:text-[#e02020] transition-colors opacity-0 group-hover:opacity-100">
                         <Trash2 size={13} />
                       </button>
@@ -176,17 +178,17 @@ export default function CartAside({ open, onClose }: { open: boolean; onClose: (
                     <div className="flex items-center justify-between mt-2">
                       {/* Qty stepper */}
                       <div className="flex items-center gap-0 border border-neutral-200 dark:border-neutral-700 rounded-lg overflow-hidden">
-                        <button onClick={() => update(item.productId, item.qty - 1)} aria-label="Decrease quantity"
+                        <button onClick={() => update(item.name, item.qty - 1)} aria-label="Decrease quantity"
                           className="w-7 h-7 flex items-center justify-center hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-neutral-500">
                           <Minus size={11} />
                         </button>
                         <span className="w-8 text-center text-xs font-semibold text-neutral-900 dark:text-white" aria-label="Current quantity">{item.qty}</span>
-                        <button onClick={() => update(item.productId, item.qty + 1)} aria-label="Increase quantity"
+                        <button onClick={() => update(item.name, item.qty + 1)} aria-label="Increase quantity"
                           className="w-7 h-7 flex items-center justify-center hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-neutral-500">
                           <Plus size={11} />
                         </button>
                       </div>
-                      <p className="font-bold text-[13px] text-neutral-900 dark:text-white">£{(item.price * item.qty).toFixed(2)}</p>
+                      <p className="font-bold text-[13px] text-neutral-900 dark:text-white">{formatPrice(item.price * item.qty)}</p>
                     </div>
                   </div>
                 </div>

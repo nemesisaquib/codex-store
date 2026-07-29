@@ -22,6 +22,10 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "**.imgix.net" },
       { protocol: "https", hostname: "cdn.dummyjson.com", port: "", pathname: "/**" },
       { protocol: "https", hostname: "fakestoreapi.com", port: "", pathname: "/**" },
+      { protocol: "https", hostname: "flagcdn.com", port: "", pathname: "/**" },
+      { protocol: "https", hostname: "upload.wikimedia.org", port: "", pathname: "/**" },
+      { protocol: "https", hostname: "*.s3.amazonaws.com" },
+      { protocol: "https", hostname: "*.s3.*.amazonaws.com" },
     ],
   },
 

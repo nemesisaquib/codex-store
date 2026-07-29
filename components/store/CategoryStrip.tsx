@@ -1,41 +1,37 @@
 "use client";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Layers } from "lucide-react";
 
-const categories = [
-  {
-    label:    "Women",
-    href:     "/category/women",
-    image:    "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80&w=800&h=1000",
-    accent:   "#e02020",
-    items:    "12,400+ items",
-  },
-  {
-    label:    "Men",
-    href:     "/category/men",
-    image:    "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&q=80&w=800&h=1000",
-    accent:   "#0a0a0a",
-    items:    "9,600+ items",
-  },
-  {
-    label:    "Kids",
-    href:     "/category/kids",
-    image:    "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?auto=format&fit=crop&q=80&w=800&h=1000",
-    accent:   "#d4a017",
-    items:    "5,200+ items",
-  },
-  {
-    label:    "Sale",
-    href:     "/sale",
-    image:    "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80&w=800&h=1000",
-    accent:   "#e02020",
-    items:    "Up to 70% off",
-    hot:      true,
-  },
-];
+interface CategoryItem {
+  id: string;
+  name: string;
+  slug: string;
+  image_url: string | null;
+  children?: any[];
+}
 
 export default function CategoryStrip() {
+  const [categories, setCategories] = useState<CategoryItem[]>([]);
+
+  useEffect(() => {
+    fetch("/api/categories?format=tree")
+      .then(r => r.json())
+      .then(d => setCategories(d.categories || []))
+      .catch(() => {});
+  }, []);
+
+  const fallbackImages = [
+    "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80&w=800&h=1000",
+    "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&q=80&w=800&h=1000",
+    "https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?auto=format&fit=crop&q=80&w=800&h=1000",
+    "https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&q=80&w=800&h=1000",
+    "https://images.unsplash.com/photo-1526738549149-8e07eca6c147?auto=format&fit=crop&q=80&w=800&h=1000",
+    "https://images.unsplash.com/photo-1523293182086-7651a899d37f?auto=format&fit=crop&q=80&w=800&h=1000"
+  ];
+
+  const displayList = categories.length > 0 ? categories.slice(0, 4) : [];
+
   return (
     <section className="max-w-[1440px] mx-auto px-6 lg:px-10 py-20">
       {/* Section header */}
@@ -58,53 +54,41 @@ export default function CategoryStrip() {
 
       {/* Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-        {categories.map((cat) => (
-          <Link
-            key={cat.label}
-            href={cat.href}
-            aria-label={`Shop ${cat.label} category`}
-            className="category-card relative overflow-hidden rounded-2xl aspect-[4/5] block group shadow-sm hover:shadow-xl transition-all duration-500 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200/60 dark:border-neutral-800"
-          >
-            {/* Image */}
-            <Image
-              src={cat.image}
-              alt={`${cat.label} collection`}
-              fill
-              sizes="(max-width: 768px) 50vw, 25vw"
-              className="object-cover transition-transform duration-700 group-hover:scale-105"
-            />
+        {displayList.map((cat, idx) => {
+          const img = cat.image_url || fallbackImages[idx % fallbackImages.length];
+          const subCount = cat.children?.length || 0;
+          return (
+            <Link
+              key={cat.id}
+              href={`/category/${cat.slug}`}
+              className="group relative h-[380px] md:h-[460px] rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 flex flex-col justify-end p-6 md:p-8"
+            >
+              {/* Background Image */}
+              <img
+                src={img}
+                alt={cat.name}
+                className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
+              />
 
-            {/* Bottom Vignette Gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent transition-opacity duration-300 group-hover:opacity-85" />
+              {/* Gradient Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent transition-opacity duration-300" />
 
-            {/* Hot badge */}
-            {cat.hot && (
-              <div className="absolute top-4 right-4 z-10">
-                <span className="badge-sale bg-[#e02020] text-white text-[10px] font-bold px-2.5 py-1 rounded-md tracking-wider shadow-md">
-                  HOT
+              {/* Content */}
+              <div className="relative z-10 text-white">
+                <span className="text-[11px] font-bold tracking-widest uppercase text-white/80 mb-1 block">
+                  {subCount > 0 ? `${subCount} Subcategories` : "Explore Collection"}
                 </span>
-              </div>
-            )}
+                <h3 className="font-display font-bold text-2xl md:text-3xl mb-4 group-hover:translate-x-1 transition-transform">
+                  {cat.name}
+                </h3>
 
-            {/* Label */}
-            <div className="cat-label absolute bottom-0 left-0 right-0 p-5 z-10">
-              <p className="text-white font-sans font-bold text-xl md:text-2xl leading-tight mb-1 drop-shadow-md">
-                {cat.label}
-              </p>
-              <p className="text-white/80 text-xs font-medium drop-shadow-sm">{cat.items}</p>
-              <div className="mt-2.5 inline-flex items-center gap-1.5 text-xs font-bold text-white group-hover:text-white transition-colors">
-                <span>Shop now</span>
-                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-white border-b-2 border-[#e02020] pb-1 group-hover:border-white transition-colors">
+                  Shop Now <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform" />
+                </div>
               </div>
-            </div>
-
-            {/* Accent bottom border */}
-            <div
-              className="absolute bottom-0 left-0 right-0 h-1 transition-transform duration-300 scale-x-0 group-hover:scale-x-100 origin-left"
-              style={{ background: cat.accent }}
-            />
-          </Link>
-        ))}
+            </Link>
+          );
+        })}
       </div>
     </section>
   );

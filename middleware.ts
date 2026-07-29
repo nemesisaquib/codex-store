@@ -214,12 +214,22 @@ export async function middleware(req: NextRequest) {
   }
 
   // ─── 5. ADMIN AUTH ROUTE ROUTING ───
-  if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
+  const isFrontendAdmin = pathname.startsWith("/admin") && pathname !== "/admin/login";
+  const isBackendAdminAPI = pathname.startsWith("/api/admin") && pathname !== "/api/auth/admin"; // Exempt login endpoint
+
+  if (isFrontendAdmin || isBackendAdminAPI) {
     const session = req.cookies.get("admin_session")?.value;
     if (!session) {
-      const url = req.nextUrl.clone();
-      url.pathname = "/admin/login";
-      return NextResponse.redirect(url);
+      if (isBackendAdminAPI) {
+        return new NextResponse(JSON.stringify({ error: "Unauthorized API Access" }), { 
+          status: 401, 
+          headers: { "Content-Type": "application/json" } 
+        });
+      } else {
+        const url = req.nextUrl.clone();
+        url.pathname = "/admin/login";
+        return NextResponse.redirect(url);
+      }
     }
   }
 
@@ -245,6 +255,6 @@ function injectSecurityHeaders(res: NextResponse) {
   res.headers.set("X-Content-Type-Options", "nosniff");
   res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   res.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
-  // CSP: standard secure baseline
-  res.headers.set("Content-Security-Policy", "upgrade-insecure-requests;");
+  // CSP: standard secure baseline allowing external images
+  res.headers.set("Content-Security-Policy", "upgrade-insecure-requests; default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; img-src * data: blob:;");
 }

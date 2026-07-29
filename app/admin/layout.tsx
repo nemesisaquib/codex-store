@@ -6,7 +6,7 @@ import {
   LayoutDashboard, Package, ShoppingCart, Users, BarChart3,
   Settings, Bell, LogOut, Search, Tag, Globe, Shield,
   Warehouse, Mail, ChevronDown, ChevronRight, Store,
-  X, Menu, AlertTriangle, UserPlus, Check, MapPin
+  X, Menu, AlertTriangle, UserPlus, Check, MapPin, FolderTree, Bookmark
 } from "lucide-react";
 import { useSettings } from "@/lib/SettingsContext";
 
@@ -30,6 +30,8 @@ const NAV = [
   { href:"/admin",             icon:LayoutDashboard, label:"Dashboard",   badge:null },
   { href:"/admin/orders",      icon:ShoppingCart,    label:"Orders",      badge:"3"  },
   { href:"/admin/products",    icon:Package,         label:"Products",    badge:null },
+  { href:"/admin/categories",  icon:FolderTree,      label:"Categories",  badge:null },
+  { href:"/admin/brands",      icon:Bookmark,        label:"Brands",      badge:null },
   { href:"/admin/inventory",   icon:Warehouse,       label:"Inventory",   badge:"12" },
   { href:"/admin/customers",   icon:Users,           label:"Customers",   badge:null },
   { href:"/admin/countries",   icon:MapPin,          label:"Countries",   badge:null },
@@ -89,8 +91,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <>
       {/* Logo */}
       <div className={`flex items-center gap-3 px-5 py-5 border-b border-neutral-800 ${collapsed?"justify-center":""}`}>
-        <div className="w-8 h-8 bg-[#e02020] rounded-lg flex items-center justify-center flex-shrink-0">
-          <Store size={16} className="text-white"/>
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden bg-neutral-900">
+          {settings.logo_url ? (
+            <img src={settings.logo_url} alt="Logo" className="w-full h-full object-contain" />
+          ) : (
+            <div className="w-full h-full bg-[#e02020] flex items-center justify-center">
+              <Store size={16} className="text-white"/>
+            </div>
+          )}
         </div>
         {!collapsed && (
           <div>
@@ -273,6 +281,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               className="hidden sm:flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-neutral-600 dark:text-neutral-400 hover:text-[#e02020] hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded-xl transition-colors">
               <Store size={14}/> View Store
             </Link>
+            {/* Top Logout Button */}
+            <button onClick={logout}
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-colors">
+              <LogOut size={14}/> Sign Out
+            </button>
           </div>
         </header>
 

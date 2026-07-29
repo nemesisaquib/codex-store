@@ -43,45 +43,53 @@ export default function ProductCard({ product }: { product: Product }) {
     : null;
 
   const fallbackBg = `linear-gradient(160deg,${product.color ?? "#c4a882"},${product.color ?? "#c4a882"}88)`;
-  const hasImg = !!product.image;
+  
+  // Premium placeholders for when admin hasn't uploaded images yet
+  const placeholders = [
+    "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&q=80",
+    "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&q=80",
+    "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&q=80",
+    "https://images.unsplash.com/photo-1434389678278-be43e498c41f?w=600&q=80",
+    "https://images.unsplash.com/photo-1542272604-787c3835535d?w=600&q=80",
+    "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=600&q=80"
+  ];
+  const charCodeSum = (product.name || "").split("").reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  const fallbackImg = placeholders[charCodeSum % placeholders.length];
+
+  const primaryImage = product.image || fallbackImg;
+  const secondaryImage = product.image2 || (product.image ? null : placeholders[(charCodeSum + 1) % placeholders.length]);
 
   return (
     <div
-      className="product-card group bg-white dark:bg-neutral-900 rounded-2xl overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
+      className="product-card group bg-white dark:bg-neutral-900 rounded-2xl overflow-hidden border border-neutral-200/90 dark:border-neutral-800 shadow-[0_4px_16px_rgba(0,0,0,0.05)] hover:shadow-[0_16px_36px_rgba(0,0,0,0.12)] transition-all duration-300 hover:-translate-y-1.5 border-t-2 border-t-transparent hover:border-t-[#e02020]"
     >
       {/* ── Image ── */}
       <Link
         href={`/product/${product.slug}`}
-        className="block relative aspect-[4/5] overflow-hidden bg-neutral-100 dark:bg-neutral-800"
+        className="block relative aspect-[4/5] overflow-hidden bg-neutral-100/80 dark:bg-neutral-800/60 border-b border-neutral-200/80 dark:border-neutral-800"
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
-        {/* Always render gradient fallback in background */}
-        <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105" style={{ background: fallbackBg }} />
 
-        {hasImg && (
-          <>
-            {/* Primary image */}
-            <Image
-              src={product.image}
-              alt={product.name || "Product Image"}
-              fill
-              unoptimized
-              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-              className={`object-contain p-4 transition-all duration-500 ${hovered && product.image2 ? "opacity-0" : "opacity-100"} group-hover:scale-105`}
-            />
-            {/* Hover image */}
-            {product.image2 && (
-              <Image
-                src={product.image2}
-                alt={`${product.name || "Product"} alternate`}
-                fill
-                unoptimized
-                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                className={`object-contain p-4 transition-all duration-500 ${hovered ? "opacity-100" : "opacity-0"} group-hover:scale-105`}
-              />
-            )}
-          </>
+        {/* Primary image */}
+        <Image
+          src={primaryImage}
+          alt={product.name || "Product Image"}
+          fill
+          unoptimized
+          sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+          className={`object-contain p-4 transition-all duration-500 ${hovered && secondaryImage ? "opacity-0" : "opacity-100"} group-hover:scale-105`}
+        />
+        {/* Hover image */}
+        {secondaryImage && (
+          <Image
+            src={secondaryImage}
+            alt={`${product.name || "Product"} alternate`}
+            fill
+            unoptimized
+            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+            className={`object-contain p-4 transition-all duration-500 ${hovered ? "opacity-100" : "opacity-0"} group-hover:scale-105`}
+          />
         )}
 
         {/* Badges */}

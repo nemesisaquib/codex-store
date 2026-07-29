@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
 
     const res = NextResponse.json({ ok: true, admin: { id: admin.id, name: admin.name, email: admin.email, role: admin.role } });
     res.cookies.set("admin_session", admin.id, {
-      httpOnly: true, sameSite: "lax", maxAge: 60 * 60 * 24 * 7, path: "/",
+      httpOnly: true, sameSite: "strict", path: "/",
     });
     return res;
   } catch (e) {

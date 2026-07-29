@@ -18,8 +18,9 @@ export async function POST(req: NextRequest) {
     const db = getDb();
     const body = await req.json();
     if (body.bulk && Array.isArray(body.bulk)) {
-      const upd = db.prepare("UPDATE products SET stock=? WHERE id=?");
-      db.transaction((rows: {id:string;stock:number}[]) => { for (const r of rows) upd.run(r.stock, r.id); })(body.bulk);
+      for (const r of body.bulk) {
+        await db.execute({ sql: "UPDATE products SET stock=? WHERE id=?", args: [r.stock, r.id] });
+      }
     } else {
       await db.execute({ sql: "UPDATE products SET stock=? WHERE id=?", args: [body.stock, body.id] });
     }

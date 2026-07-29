@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Search, Download, Eye, X, Truck, CheckCircle, Package, Clock, RefreshCw } from "lucide-react";
+import { useSettings } from "@/lib/SettingsContext";
 
 interface Order {
   id:string; order_number:string; customer_name:string; customer_email:string;
@@ -17,6 +18,7 @@ const S: Record<string,string> = {
 };
 
 export default function AdminOrdersPage() {
+  const { formatPrice } = useSettings();
   const [orders, setOrders]     = useState<Order[]>([]);
   const [total, setTotal]       = useState(0);
   const [filter, setFilter]     = useState("all");
@@ -121,7 +123,7 @@ export default function AdminOrdersPage() {
                 <tr key={o.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
                   <td className="px-5 py-4 font-mono-brand text-xs font-bold text-[#e02020]">{o.order_number}</td>
                   <td className="px-5 py-4"><p className="text-sm font-medium text-neutral-900 dark:text-white">{o.customer_name}</p><p className="text-[10px] text-neutral-400">{o.customer_email}</p></td>
-                  <td className="px-5 py-4 text-sm font-bold text-neutral-900 dark:text-white">${o.total}</td>
+                  <td className="px-5 py-4 text-sm font-bold text-neutral-900 dark:text-white">{formatPrice(o.total)}</td>
                   <td className="px-5 py-4">
                     <select value={o.status} onChange={e=>updateStatus(o.id,e.target.value)}
                       className={`text-[10px] font-bold px-2 py-1 rounded-full capitalize border-0 cursor-pointer focus:outline-none ${S[o.status]??S.pending}`}>
@@ -188,11 +190,15 @@ export default function AdminOrdersPage() {
                 <div className="space-y-3">
                   {(() => { try { return JSON.parse(selected.items); } catch { return []; } })().map((item: {name:string;qty:number;price:number;image?:string}, i: number) => (
                     <div key={i} className="flex items-center gap-3 p-3 bg-neutral-50 dark:bg-neutral-800 rounded-xl">
-                      <div className="w-12 h-14 rounded-lg overflow-hidden bg-neutral-200 flex-shrink-0">
-                        {item.image ? <img src={item.image} alt={item.name} className="w-full h-full object-cover"/> : <div className="w-full h-full bg-neutral-300"/>}
+                      <div className="w-12 h-14 rounded-lg overflow-hidden bg-white dark:bg-neutral-800 flex-shrink-0 border border-neutral-200 dark:border-neutral-700">
+                        {(item.image || (item as any).image_url || (item as any).img || (item as any).imageUrl) ? (
+                          <img src={item.image || (item as any).image_url || (item as any).img || (item as any).imageUrl} alt={item.name} className="w-full h-full object-contain p-1"/>
+                        ) : (
+                          <div className="w-full h-full bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center text-xs text-neutral-400">🛍️</div>
+                        )}
                       </div>
                       <div className="flex-1"><p className="text-sm font-medium text-neutral-900 dark:text-white">{item.name}</p><p className="text-xs text-neutral-400">Qty: {item.qty}</p></div>
-                      <p className="font-bold text-sm text-neutral-900 dark:text-white">${item.price}</p>
+                      <p className="font-bold text-sm text-neutral-900 dark:text-white">{formatPrice(item.price * item.qty)}</p>
                     </div>
                   ))}
                 </div>
@@ -202,7 +208,7 @@ export default function AdminOrdersPage() {
               <div className="p-4 bg-neutral-50 dark:bg-neutral-800 rounded-xl space-y-2 text-sm">
                 <div className="flex justify-between text-neutral-500"><span>Shipping</span><span className="text-green-600">FREE</span></div>
                 <div className="flex justify-between font-bold text-neutral-900 dark:text-white text-base border-t border-neutral-200 dark:border-neutral-700 pt-2">
-                  <span>Total</span><span>${selected.total}</span>
+                  <span>Total</span><span>{formatPrice(selected.total)}</span>
                 </div>
               </div>
 

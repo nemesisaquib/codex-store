@@ -82,7 +82,17 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const db = getDb();
+  let name = "E-shop";
+  let logo = "";
+  try {
+    const rows = (await db.execute("SELECT key, value FROM settings WHERE key IN ('store_name', 'logo_url')")).rows as {key:string, value:string}[];
+    const s = Object.fromEntries(rows.map(r => [r.key, r.value]));
+    if (s.store_name) name = s.store_name;
+    if (s.logo_url) logo = s.logo_url;
+  } catch {}
+
   return (
     <html lang="en" className={`h-full antialiased ${playfair.variable} ${dmSans.variable} ${jetbrains.variable}`}>
       <head>
@@ -91,6 +101,28 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />
       </head>
       <body className="min-h-full bg-white dark:bg-neutral-950 text-neutral-900 dark:text-neutral-50">
+        {/* JSON-LD WebSite & Organization Schema */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@graph": [
+                {
+                  "@type": "WebSite",
+                  "name": name,
+                  "url": process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+                },
+                {
+                  "@type": "Organization",
+                  "name": name,
+                  "url": process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+                  "logo": logo || undefined
+                }
+              ]
+            })
+          }}
+        />
         <SettingsProvider>
           <CountryProvider>
             {children}

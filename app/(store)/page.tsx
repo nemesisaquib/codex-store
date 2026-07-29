@@ -6,6 +6,7 @@ import FeaturedProducts  from "@/components/store/FeaturedProducts";
 import VideoShowcase     from "@/components/store/VideoShowcase";
 import NewArrivalsCarousel from "@/components/store/NewArrivalsCarousel";
 import BrandStory        from "@/components/store/BrandStory";
+import SocialFeed        from "@/components/store/SocialFeed";
 import { getPageMetadata } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -22,6 +23,7 @@ export default function HomePage() {
       <VideoShowcase />
       <NewArrivalsCarousel />
       <BrandStory />
+      <SocialFeed />
     </>
   );
 }

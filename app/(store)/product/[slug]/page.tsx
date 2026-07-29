@@ -5,21 +5,21 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { Heart, ShoppingBag, Star, Shield, RotateCcw, Truck, ChevronDown, ChevronUp, Share2, MapPin } from "lucide-react";
 import ProductCard from "@/components/store/ProductCard";
-import { toProduct, type ApiProduct } from "@/lib/api";
+import { toProduct, safeJsonArray, type ApiProduct } from "@/lib/api";
+import { useSettings } from "@/lib/SettingsContext";
 import { useCountry } from "@/lib/CountryContext";
-
-const SIZES = ["XS","S","M","L","XL","XXL"];
 
 interface Review { id:string; rating:number; title:string|null; comment:string|null; created_at:string; first_name:string; last_name:string }
 
-export default function ProductPage() {
+export default function ProductViewPage() {
   const { slug } = useParams<{ slug: string }>();
+  const { formatPrice } = useSettings();
   const { country } = useCountry();
   const [product, setProduct]   = useState<ApiProduct | null>(null);
   const [related, setRelated]   = useState<ReturnType<typeof toProduct>[]>([]);
   const [loading, setLoading]   = useState(true);
   const [isAdding, setIsAdding] = useState(false);
-  const [size, setSize]         = useState<string | null>(null);
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [qty, setQty]           = useState(1);
   const [wishlisted, setWish]   = useState(false);
   const [expanded, setExpanded] = useState<string|null>("description");
@@ -30,16 +30,16 @@ export default function ProductPage() {
   const [locationName, setLocationName] = useState("");
 
   useEffect(() => {
-    fetch(`/api/products/${slug}`)
+    fetch(`/api/products/${slug}`, { cache: "no-store" })
       .then(r => r.json())
       .then((p: ApiProduct) => {
         setProduct(p);
         setLoading(false);
         if (p?.id) {
-          fetch(`/api/reviews?productId=${p.id}`).then(r=>r.json()).then(d=>setReviews(d.reviews ?? []));
+          fetch(`/api/reviews?productId=${p.id}`, { cache: "no-store" }).then(r=>r.json()).then(d=>setReviews(d.reviews ?? []));
         }
       });
-    fetch("/api/products?limit=4")
+    fetch("/api/products?limit=4", { cache: "no-store" })
       .then(r => r.json())
       .then((d: { products: ApiProduct[] }) => setRelated(d.products.map(toProduct)));
   }, [slug]);
@@ -78,21 +78,61 @@ export default function ProductPage() {
     );
   }
 
-  const colors: string[] = (() => { try { return JSON.parse(product.colors); } catch { return []; } })();
+  const colors: string[] = safeJsonArray(product.colors);
   const discount = product.compare_price
     ? Math.round((1 - product.price / product.compare_price) * 100)
     : null;
-  const bg = `linear-gradient(160deg,${product.color || "#c4a882"},${product.color || "#c4a882"}88)`;
-  const bgs = [bg, bg.replace("160deg","200deg"), bg.replace("160deg","220deg"), bg.replace("160deg","180deg")];
-  // Real images: main + hover + uploaded gallery
-  let extra: string[] = [];
-  try { extra = (product as { gallery?: string }).gallery ? JSON.parse((product as { gallery?: string }).gallery!) : []; } catch { extra = []; }
-  const realImgs = [product.image_url, product.image_url2, ...extra].filter(Boolean) as string[];
+  const extraImgs: string[] = safeJsonArray(product.gallery);
+  const realImgs = [product.image_url, product.image_url2, ...extraImgs].filter(Boolean) as string[];
   const gallery = realImgs.length ? realImgs : [];
+
+  const attrs: {key:string,value:string}[] = safeJsonArray(product.attributes);
+  const opts: {name:string,values:string[]}[] = safeJsonArray(product.options);
+
+  const hasSpecs = attrs && attrs.length > 0;
+  const specText = attrs.map((a: any) => `${a.key}: ${a.value}`).join("\n") || "";
+
+  const accordions = [
+    {k:"description",t:"Description",c:product.description || `A premium piece from ${product.brand}. Crafted with attention to quality and fit for the modern wardrobe.`},
+    hasSpecs ? {k:"specifications",t:"Specifications", c:specText} : null,
+    {k:"delivery",t:"Delivery & Returns",c:"Standard (3-7 days): Free over $150. Express (1-3 days): $12.95. Free returns within 30 days."},
+    {k:"care",t:"Size & Care",c:"Check label for specific care instructions. Sizes may vary — consult size guide."},
+  ].filter(Boolean) as {k:string;t:string;c:string}[];
 
   return (
     <div className="min-h-screen bg-white dark:bg-neutral-950 pt-[100px]">
       <div className="max-w-[1440px] mx-auto px-6 lg:px-10 py-10">
+        {/* JSON-LD Schema for AI/Google Search */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Product",
+              "name": product.name,
+              "image": gallery.length ? gallery : undefined,
+              "description": product.description || `Buy ${product.name} by ${product.brand}`,
+              "brand": {
+                "@type": "Brand",
+                "name": product.brand
+              },
+              "offers": {
+                "@type": "Offer",
+                "url": `${typeof window !== 'undefined' ? window.location.href : ''}`,
+                "priceCurrency": "GBP",
+                "price": product.price,
+                "itemCondition": "https://schema.org/NewCondition",
+                "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+              },
+              "aggregateRating": product.reviews > 0 ? {
+                "@type": "AggregateRating",
+                "ratingValue": product.rating,
+                "reviewCount": product.reviews
+              } : undefined
+            })
+          }}
+        />
+
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-xs text-neutral-400 mb-8">
           {["Home","Shop",product.category,product.name].map((b,i,arr) => (
@@ -109,30 +149,24 @@ export default function ProductPage() {
         <div className="grid lg:grid-cols-2 gap-12 xl:gap-20 items-start">
           {/* Images */}
           <div className="flex gap-4 lg:sticky lg:top-[120px] lg:h-fit">
-            {/* Thumbnails — gradient bg always, image overlay (broken img reveals gradient) */}
+            {/* Thumbnails */}
             <div className="hidden md:flex flex-col gap-3">
-              {(gallery.length ? gallery : bgs).map((g,i) => (
+              {(gallery.length ? gallery : ["https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&q=80"]).map((g,i) => (
                 <button key={i} onClick={() => setActiveImg(i)}
-                  className={`w-20 h-24 rounded-xl flex-shrink-0 border-2 overflow-hidden transition-all relative ${activeImg===i?"border-[#e02020]":"border-transparent hover:border-neutral-300"} ${gallery.length > 0 ? "bg-neutral-100 dark:bg-neutral-900" : ""}`}
-                  style={gallery.length > 0 ? {} : { background: bgs[i % bgs.length] }}>
-                  {gallery.length > 0 && (
-                    <img src={g} alt="" className="absolute inset-0 w-full h-full object-cover object-center" onError={e=>(e.currentTarget.style.display="none")}/>
-                  )}
+                  className={`w-20 h-24 rounded-xl flex-shrink-0 border-2 overflow-hidden transition-all relative bg-slate-50 dark:bg-neutral-900 border-slate-200/70 dark:border-neutral-800 ${activeImg===i?"border-[#e02020] ring-2 ring-[#e02020]/20":"hover:border-neutral-400"}`}>
+                  <img src={g} alt="" className="absolute inset-0 w-full h-full object-contain p-1.5" onError={e=>(e.currentTarget.style.display="none")}/>
                 </button>
               ))}
             </div>
             {/* Main image */}
-            <div className={`flex-1 rounded-2xl overflow-hidden aspect-[4/5] relative ${gallery.length > 0 ? "bg-neutral-100 dark:bg-neutral-900" : ""}`} 
-                 style={gallery.length > 0 ? {} : { background: bgs[activeImg % bgs.length] }}>
-              {gallery.length > 0 && (
-                <img
-                  key={gallery[activeImg] ?? gallery[0]}
-                  src={gallery[activeImg] ?? gallery[0]}
-                  alt={product.name}
-                  className="absolute inset-0 w-full h-full object-cover object-center"
-                  onError={e=>(e.currentTarget.style.display="none")}
-                />
-              )}
+            <div className="flex-1 rounded-2xl overflow-hidden aspect-[4/5] relative bg-gradient-to-b from-slate-50 via-slate-50/50 to-slate-100/80 dark:from-neutral-900 dark:to-neutral-950 border border-slate-200/60 dark:border-neutral-800 shadow-sm p-4 md:p-8">
+              <img
+                key={gallery[activeImg] ?? gallery[0] ?? "fallback"}
+                src={gallery[activeImg] ?? gallery[0] ?? "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&q=80"}
+                alt={product.name}
+                className="w-full h-full object-contain drop-shadow-sm transition-transform duration-500 hover:scale-105"
+                onError={e=>(e.currentTarget.style.display="none")}
+              />
               <div className="absolute top-4 right-4 flex gap-2 z-10">
                 <button onClick={async () => {
                     const next = !wishlisted; setWish(next);
@@ -176,44 +210,31 @@ export default function ProductPage() {
             </div>
 
             <div className="flex items-center gap-3 mb-7">
-              <span className="font-display font-bold text-3xl text-neutral-900 dark:text-white">£{product.price.toFixed(2)}</span>
-              {product.compare_price && <span className="text-lg text-neutral-400 line-through">£{product.compare_price.toFixed(2)}</span>}
+              <span className="font-display font-bold text-3xl text-neutral-900 dark:text-white">{formatPrice(product.price)}</span>
+              {product.compare_price && <span className="text-lg text-neutral-400 line-through">{formatPrice(product.compare_price)}</span>}
               {discount && <span className="badge-sale bg-[#e02020] text-white text-xs font-bold px-2.5 py-1 rounded-full">-{discount}%</span>}
             </div>
 
-            {/* Colours */}
-            {colors.length > 0 && (
-              <div className="mb-6">
-                <p className="text-xs font-bold tracking-wider uppercase text-neutral-600 dark:text-neutral-400 mb-3">Colour</p>
-                <div className="flex gap-2.5">
-                  {colors.map(c => (
-                    <button key={c} title={c}
-                      className="w-8 h-8 rounded-full border-2 border-white dark:border-neutral-800 shadow-sm hover:scale-110 transition-all"
-                      style={{background:c}}/>
-                  ))}
+            {/* Dynamic Options */}
+            {opts && opts.map((opt: any) => {
+              const isColor = opt.name.toLowerCase().includes("color") || opt.name.toLowerCase().includes("colour");
+              return (
+                <div key={opt.name} className="mb-6">
+                  <p className="text-xs font-bold tracking-wider uppercase text-neutral-600 dark:text-neutral-400 mb-3">{opt.name}</p>
+                  <div className={`flex flex-wrap ${isColor ? 'gap-2.5' : 'gap-3'}`}>
+                    {opt.values.map(val => (
+                      <button key={val} title={val} onClick={() => setSelectedOptions(p => ({...p, [opt.name]: val}))}
+                        className={isColor ? `w-8 h-8 rounded-full border-2 shadow-sm transition-all ${selectedOptions[opt.name] === val ? 'border-[#e02020] scale-110' : 'border-white dark:border-neutral-800 hover:scale-110'}` 
+                        : `min-w-[3.5rem] h-12 px-4 border rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center ${selectedOptions[opt.name] === val ? "border-neutral-900 bg-neutral-900 text-white dark:border-white dark:bg-white dark:text-neutral-900 shadow-md scale-105" : "border-neutral-200 text-neutral-600 hover:border-neutral-900 hover:text-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:hover:border-white dark:hover:text-white"}`}
+                        style={isColor ? {background:val} : {}}
+                      >
+                        {!isColor && val}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
-
-            {/* Size */}
-            <div className="mb-7">
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-xs font-bold tracking-wider uppercase text-neutral-600 dark:text-neutral-400">Size</p>
-                <button className="text-xs text-[#e02020] hover:underline">Size guide</button>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                {SIZES.map(s => (
-                  <button key={s} onClick={() => setSize(s)}
-                    className={`min-w-[3.5rem] h-12 px-4 border rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center ${
-                      size === s 
-                      ? "border-neutral-900 bg-neutral-900 text-white dark:border-white dark:bg-white dark:text-neutral-900 shadow-md scale-105" 
-                      : "border-neutral-200 text-neutral-600 hover:border-neutral-900 hover:text-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:hover:border-white dark:hover:text-white"
-                    }`}>
-                    {s}
-                  </button>
-                ))}
-              </div>
-            </div>
+              );
+            })}
 
             {/* Qty + Add */}
             <div className="flex gap-3 mb-6">
@@ -225,11 +246,13 @@ export default function ProductPage() {
               <button
                 disabled={isAdding}
                 onClick={async () => {
-                  if (!size) { toast.error("Select a size", { description: "Please choose a size before adding to bag." }); return; }
+                  const unselected = (opts || []).find((o: any) => !selectedOptions[o.name]);
+                  if (unselected) { toast.error(`Select a ${unselected.name}`, { description: `Please choose a ${unselected.name} before adding to bag.` }); return; }
                   setIsAdding(true);
                   try {
                     const cart: Array<{ productId: string; name: string; qty: number; price: number; image?: string }> = await fetch("/api/cart").then(r => r.json()).then(d => d.items ?? []);
-                    const itemName = `${product.name} (${size})`;
+                    const optionString = Object.values(selectedOptions).join(" / ");
+                    const itemName = optionString ? `${product.name} (${optionString})` : product.name;
                     const existingIdx = cart.findIndex(i => i.name === itemName);
                     if (existingIdx > -1) {
                       cart[existingIdx].qty += qty;
@@ -238,7 +261,7 @@ export default function ProductPage() {
                     }
                     const res = await fetch("/api/cart", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items: cart }) });
                     if (res.ok) {
-                      toast.success("Added to bag", { description: `${product.name} · Size ${size} · Qty ${qty}` });
+                      toast.success("Added to bag", { description: optionString ? `${product.name} · ${optionString} · Qty ${qty}` : `${product.name} · Qty ${qty}` });
                       window.dispatchEvent(new Event("cart-updated"));
                     } else if (res.status === 401) {
                       toast.error("Please sign in", { description: "Log in to add items to your bag." });
@@ -335,17 +358,13 @@ export default function ProductPage() {
             </div>
 
             {/* Accordion */}
-            {[
-              {k:"description",t:"Description",c:`A premium piece from ${product.brand}. Crafted with attention to quality and fit for the modern wardrobe.`},
-              {k:"delivery",t:"Delivery & Returns",c:"Standard (3-7 days): Free over $150. Express (1-3 days): $12.95. Free returns within 30 days."},
-              {k:"care",t:"Size & Care",c:"Check label for specific care instructions. Sizes may vary — consult size guide."},
-            ].map(({k,t,c}) => (
+            {accordions.map(({k,t,c}) => (
               <div key={k} className="border-b border-neutral-200 dark:border-neutral-800">
                 <button onClick={() => setExpanded(expanded===k?null:k)}
                   className="flex items-center justify-between w-full py-4 text-sm font-semibold text-neutral-900 dark:text-white cursor-pointer hover:opacity-80 transition-opacity">
                   {t} {expanded===k?<ChevronUp size={16}/>:<ChevronDown size={16}/>}
                 </button>
-                {expanded===k && <p className="pb-4 text-sm text-neutral-500 leading-relaxed">{c}</p>}
+                {expanded===k && <p className="pb-4 text-sm text-neutral-500 leading-relaxed whitespace-pre-wrap">{c}</p>}
               </div>
             ))}
           </div>
@@ -383,6 +402,40 @@ export default function ProductPage() {
           </div>
         )}
       </div>
+      
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org/",
+            "@type": "Product",
+            "name": product.name,
+            "image": realImgs,
+            "description": product.meta_desc || product.description,
+            "keywords": product.meta_keywords || undefined,
+            "sku": product.slug,
+            "brand": {
+              "@type": "Brand",
+              "name": product.brand || "Codex"
+            },
+            "offers": {
+              "@type": "Offer",
+              "url": `https://codex.com/product/${product.slug}`,
+              "priceCurrency": "USD",
+              "price": product.price,
+              "itemCondition": "https://schema.org/NewCondition",
+              "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+            },
+            ...((attrs && attrs.length > 0) ? {
+              "additionalProperty": attrs.map((a: any) => ({
+                "@type": "PropertyValue",
+                "name": a.key,
+                "value": a.value
+              }))
+            } : {})
+          })
+        }}
+      />
     </div>
   );
 }

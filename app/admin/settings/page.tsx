@@ -29,6 +29,9 @@ const FIELD_LABELS: Record<string,string> = {
   express_shipping_price:"Express Shipping ($)",
   overnight_shipping_price:"Overnight Shipping ($)",
   tax_rate:"Tax Rate (%)",
+  shipping_api_carrier:"Shipping Logistics Carrier",
+  shipping_api_key:"Shipping API Secret Key",
+  shipping_api_mode:"Shipping API Mode (Sandbox/Live)",
   low_stock_alert:"Low Stock Alert Threshold",
   meta_title:"Default Meta Title",
   meta_desc:"Default Meta Description",
@@ -213,6 +216,7 @@ export default function AdminSettingsPage() {
       body:JSON.stringify(edits),
     });
     setSaving(false); setSaved(true);
+    window.dispatchEvent(new Event("settings-updated"));
     setTimeout(() => { setSaved(false); setEdits({}); load(); }, 1500);
   };
 

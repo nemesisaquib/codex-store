@@ -199,15 +199,53 @@ const MEGA_MENU_DATA: Record<string, {
       },
     ],
   },
+  Categories: {
+    categories: [
+      {
+        title: "ALL CATEGORIES",
+        links: [
+          { name: "Explore All", href: "/categories" },
+          { name: "Electronics & Computers", href: "/category/electronics" },
+          { name: "Jewelry & Accessories", href: "/category/jewelry" },
+          { name: "Shoes & Footwear", href: "/category/shoes" },
+          { name: "Home & Decor", href: "/category/furniture" },
+        ],
+      },
+      {
+        title: "SHOP BY TYPE",
+        links: [
+          { name: "Women's Fashion", href: "/category/womens" },
+          { name: "Men's Fashion", href: "/category/mens" },
+          { name: "Kids & Toys", href: "/category/kids" },
+          { name: "Groceries", href: "/category/groceries" },
+        ],
+      },
+    ],
+    featured: [
+      {
+        title: "High-End Electronics",
+        price: "From $199.00",
+        image: "https://images.unsplash.com/photo-1498049794561-7780e7231661?w=600&q=80",
+        href: "/category/electronics",
+      },
+      {
+        title: "Luxury Jewelry",
+        price: "From $49.00",
+        image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&q=80",
+        href: "/category/jewelry",
+      },
+    ],
+  },
 };
 
 const NAV_LINKS = [
-  { label: "Women",    href: "/category/women",  sub: ["Dresses", "Tops", "Trousers", "Outerwear", "Shoes"] },
-  { label: "Men",      href: "/category/men",    sub: ["Shirts", "Trousers", "Jackets", "Shoes", "Accessories"] },
-  { label: "Kids",     href: "/category/kids",   sub: ["Girls", "Boys", "Babies", "Shoes"] },
-  { label: "Sale",     href: "/sale",            sub: null, sale: true },
-  { label: "New In",   href: "/new-arrivals",    sub: null },
-  { label: "Brands",   href: "/brands",          sub: null },
+  { label: "Women",      href: "/category/women",  sub: ["Dresses", "Tops", "Trousers", "Outerwear", "Shoes"] },
+  { label: "Men",        href: "/category/men",    sub: ["Shirts", "Trousers", "Jackets", "Shoes", "Accessories"] },
+  { label: "Kids",       href: "/category/kids",   sub: ["Girls", "Boys", "Babies", "Shoes"] },
+  { label: "Categories", href: "/categories",      sub: ["Electronics", "Jewelry", "Shoes", "Furniture", "Groceries"] },
+  { label: "Sale",       href: "/sale",            sub: null, sale: true },
+  { label: "New In",     href: "/new-arrivals",    sub: null },
+  { label: "Brands",     href: "/brands",          sub: null },
 ];
 
 export default function Navbar() {

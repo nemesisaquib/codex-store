@@ -19,6 +19,9 @@ const DEFAULT_SETTINGS = [
   { key: "express_shipping_price",   value: "12.99",group_name: "shipping" },
   { key: "overnight_shipping_price", value: "24.99",group_name: "shipping" },
   { key: "tax_rate",                 value: "8.5",  group_name: "shipping" },
+  { key: "shipping_api_carrier",     value: "DHL Express", group_name: "shipping" },
+  { key: "shipping_api_key",         value: "ship_live_8492049182394", group_name: "shipping" },
+  { key: "shipping_api_mode",        value: "sandbox", group_name: "shipping" },
   // SEO
   { key: "meta_title",    value: "E-shop — Wear the World | Premium Global Fashion", group_name: "seo" },
   { key: "meta_desc",     value: "Premium international clothing eCommerce. Shop women, men, and kids fashion.", group_name: "seo" },
