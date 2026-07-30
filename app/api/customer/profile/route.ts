@@ -6,14 +6,14 @@ async function getCustomerId(req: NextRequest): Promise<string | null> {
   const db = getDb();
   const token = req.cookies.get("customer_session")?.value;
   if (!token) return null;
-  const sess = (await db.execute({ sql: "SELECT customer_id FROM sessions WHERE token=? AND expires > datetime('now')", args: [token] })).rows[0] as {customer_id:string}|undefined;
+  const sess = (await db.execute({ sql: "SELECT customer_id FROM sessions WHERE token=? AND expires > datetime('now')", args: [token] })).rows[0] as unknown as {customer_id:string}|undefined;
   return sess?.customer_id ?? null;
 }
 
 export async function GET(req: NextRequest) {
   try {
     const db = getDb();
-    const customerId = getCustomerId(req);
+    const customerId = await getCustomerId(req);
     if (!customerId) return NextResponse.json({ profile: null });
 
     const profile = (await db.execute({ sql: "SELECT id,email,first_name,last_name,phone,country,status,tier,loyalty_pts,total_orders,total_spend FROM customers WHERE id=?", args: [customerId] })).rows[0];
@@ -27,13 +27,13 @@ export async function GET(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   try {
     const db = getDb();
-    const customerId = getCustomerId(req);
+    const customerId = await getCustomerId(req);
     if (!customerId) return NextResponse.json({ ok: false, error: "Not logged in" }, { status: 401 });
 
     const { firstName, lastName, phone, country, password } = await req.json();
 
     const updates: string[] = [];
-    const values: unknown[] = [];
+    const values: any[] = [];
     if (firstName !== undefined) { updates.push("first_name=?"); values.push(firstName); }
     if (lastName !== undefined) { updates.push("last_name=?"); values.push(lastName); }
     if (phone !== undefined) { updates.push("phone=?"); values.push(phone); }

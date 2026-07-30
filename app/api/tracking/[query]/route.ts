@@ -24,7 +24,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ quer
     }
 
     // Fetch store shipping API carrier from settings DB
-    const settingsRows = (await db.execute("SELECT key, value FROM settings WHERE key LIKE 'shipping_%'")).rows as { key: string; value: string }[];
+    const settingsRows = (await db.execute("SELECT key, value FROM settings WHERE key LIKE 'shipping_%'")).rows as unknown as { key: string; value: string }[];
     const settings = Object.fromEntries(settingsRows.map(r => [r.key, r.value]));
 
     const carrier = settings.shipping_api_carrier || "DHL Express";

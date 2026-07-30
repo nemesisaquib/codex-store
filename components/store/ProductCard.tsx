@@ -7,6 +7,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import QuickView from "./QuickView";
 import { useSettings } from "@/lib/SettingsContext";
+import { getOptimizedImageUrl, getFallbackImage } from "@/lib/imageUtils";
 
 export interface Product {
   id:           string;
@@ -44,20 +45,11 @@ export default function ProductCard({ product }: { product: Product }) {
 
   const fallbackBg = `linear-gradient(160deg,${product.color ?? "#c4a882"},${product.color ?? "#c4a882"}88)`;
   
-  // Premium placeholders for when admin hasn't uploaded images yet
-  const placeholders = [
-    "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&q=80",
-    "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&q=80",
-    "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&q=80",
-    "https://images.unsplash.com/photo-1434389678278-be43e498c41f?w=600&q=80",
-    "https://images.unsplash.com/photo-1542272604-787c3835535d?w=600&q=80",
-    "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=600&q=80"
-  ];
-  const charCodeSum = (product.name || "").split("").reduce((sum, char) => sum + char.charCodeAt(0), 0);
-  const fallbackImg = placeholders[charCodeSum % placeholders.length];
+  const rawPrimary = product.image || product.image_url || getFallbackImage(product.name || "");
+  const rawSecondary = product.image2 || product.image_url2 || null;
 
-  const primaryImage = product.image || fallbackImg;
-  const secondaryImage = product.image2 || (product.image ? null : placeholders[(charCodeSum + 1) % placeholders.length]);
+  const primaryImage = getOptimizedImageUrl(rawPrimary, { width: 800, quality: 85 });
+  const secondaryImage = rawSecondary ? getOptimizedImageUrl(rawSecondary, { width: 800, quality: 85 }) : null;
 
   return (
     <div
@@ -66,7 +58,7 @@ export default function ProductCard({ product }: { product: Product }) {
       {/* ── Image ── */}
       <Link
         href={`/product/${product.slug}`}
-        className="block relative aspect-[4/5] overflow-hidden bg-neutral-100/80 dark:bg-neutral-800/60 border-b border-neutral-200/80 dark:border-neutral-800"
+        className="block relative aspect-[4/5] overflow-hidden bg-gradient-to-b from-neutral-50 to-neutral-100/90 dark:from-neutral-900 dark:to-neutral-950 border-b border-neutral-200/80 dark:border-neutral-800"
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
@@ -78,7 +70,7 @@ export default function ProductCard({ product }: { product: Product }) {
           fill
           unoptimized
           sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-          className={`object-contain p-4 transition-all duration-500 ${hovered && secondaryImage ? "opacity-0" : "opacity-100"} group-hover:scale-105`}
+          className={`object-contain p-3 transition-all duration-500 ${hovered && secondaryImage ? "opacity-0 scale-100" : "opacity-100 group-hover:scale-105"}`}
         />
         {/* Hover image */}
         {secondaryImage && (
@@ -88,7 +80,7 @@ export default function ProductCard({ product }: { product: Product }) {
             fill
             unoptimized
             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-            className={`object-contain p-4 transition-all duration-500 ${hovered ? "opacity-100" : "opacity-0"} group-hover:scale-105`}
+            className={`object-contain p-3 transition-all duration-500 ${hovered ? "opacity-100 scale-105" : "opacity-0 scale-100"}`}
           />
         )}
 

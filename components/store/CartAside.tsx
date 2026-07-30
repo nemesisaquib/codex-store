@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { X, ShoppingBag, Trash2, ArrowRight, Tag, Truck, Plus, Minus, Package, Sparkles } from "lucide-react";
 import { useSettings } from "@/lib/SettingsContext";
+import { getOptimizedImageUrl } from "@/lib/imageUtils";
 
 interface CartItem { productId: string; name: string; qty: number; price: number; image?: string }
 
@@ -162,7 +163,7 @@ export default function CartAside({ open, onClose }: { open: boolean; onClose: (
                   {/* Image */}
                   <div className="w-[68px] h-[84px] rounded-xl bg-neutral-100 dark:bg-neutral-800 flex-shrink-0 overflow-hidden relative">
                     {item.image
-                      ? <Image src={item.image} alt={item.name} fill unoptimized sizes="68px" className="object-contain p-1" />
+                      ? <Image src={getOptimizedImageUrl(item.image, { width: 200, quality: 80 })} alt={item.name} fill unoptimized sizes="68px" className="object-contain p-1" />
                       : <div className="w-full h-full flex items-center justify-center"><ShoppingBag size={20} className="text-neutral-300" /></div>
                     }
                   </div>

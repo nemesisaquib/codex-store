@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: "Not logged in" }, { status: 401 });
     }
 
-    const sess = (await db.execute({ sql: "SELECT customer_id FROM sessions WHERE token=? AND expires > datetime('now')", args: [token] })).rows[0] as {customer_id:string}|undefined;
+    const sess = (await db.execute({ sql: "SELECT customer_id FROM sessions WHERE token=? AND expires > datetime('now')", args: [token] })).rows[0] as unknown as {customer_id:string}|undefined;
     const customerId = sess?.customer_id;
     if (!customerId) {
       return NextResponse.json({ ok: false, error: "Session expired" }, { status: 401 });

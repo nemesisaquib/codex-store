@@ -6,14 +6,14 @@ async function getCustomerId(req: NextRequest): Promise<string | null> {
   const db = getDb();
   const token = req.cookies.get("customer_session")?.value;
   if (!token) return null;
-  const sess = (await db.execute({ sql: "SELECT customer_id FROM sessions WHERE token=? AND expires > datetime('now')", args: [token] })).rows[0] as {customer_id:string}|undefined;
+  const sess = (await db.execute({ sql: "SELECT customer_id FROM sessions WHERE token=? AND expires > datetime('now')", args: [token] })).rows[0] as unknown as {customer_id:string}|undefined;
   return sess?.customer_id ?? null;
 }
 
 export async function GET(req: NextRequest) {
   try {
     const db = getDb();
-    const customerId = getCustomerId(req);
+    const customerId = await getCustomerId(req);
     if (!customerId) return NextResponse.json({ items: [] });
 
     const rows = (await db.execute({ sql: `
@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const db = getDb();
-    const customerId = getCustomerId(req);
+    const customerId = await getCustomerId(req);
     if (!customerId) return NextResponse.json({ ok: false, error: "Not logged in" }, { status: 401 });
 
     const { productId } = await req.json();
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   try {
     const db = getDb();
-    const customerId = getCustomerId(req);
+    const customerId = await getCustomerId(req);
     if (!customerId) return NextResponse.json({ ok: false, error: "Not logged in" }, { status: 401 });
 
     const { productId } = await req.json();

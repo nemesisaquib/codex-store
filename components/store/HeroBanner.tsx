@@ -1,23 +1,24 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
+import { getOptimizedImageUrl } from "@/lib/imageUtils";
 
 export default function HeroBanner() {
   const categories = [
     {
       title: "Fresh sweatshirts",
       href: "/category/women",
-      image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000&auto=format&fit=crop",
+      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1515886657613-9f3515b0c78f", { width: 1400, quality: 90 }),
     },
     {
       title: "New drop from Supreme",
       href: "/category/men",
-      image: "https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=1000&auto=format&fit=crop",
+      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1509631179647-0177331693ae", { width: 1400, quality: 90 }),
     },
     {
       title: "Exclusive access",
       href: "/category/all",
-      image: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=1000&auto=format&fit=crop",
+      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1539571696357-5a69c17a67c6", { width: 1400, quality: 90 }),
     }
   ];
 

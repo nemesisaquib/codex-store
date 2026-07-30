@@ -20,7 +20,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const db = getDb();
     const body = await req.json();
 
-    const map: Record<string, unknown> = {};
+    const map: Record<string, any> = {};
     if (body.name !== undefined) map["name"] = body.name;
     if (body.slug !== undefined) map["slug"] = body.slug;
     if (body.logo_url !== undefined) map["logo_url"] = body.logo_url || null;
@@ -31,7 +31,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     if (keys.length === 0) return NextResponse.json({ ok: true });
 
     const sets = keys.map(k => `${k} = ?`).join(", ");
-    const vals = [...keys.map(k => map[k]), id];
+    const vals: any[] = [...keys.map(k => map[k]), id];
 
     await db.execute({ sql: `UPDATE brands SET ${sets} WHERE id = ?`, args: [...vals] });
 

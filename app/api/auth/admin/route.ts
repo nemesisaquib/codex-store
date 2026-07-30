@@ -5,7 +5,7 @@ export async function POST(req: NextRequest) {
   try {
     const { email, password } = await req.json();
     const db = getDb();
-    const admin = (await db.execute({ sql: "SELECT * FROM admin_users WHERE email=? AND password=?", args: [email, password] })).rows[0] as {id:string;name:string;email:string;role:string}|undefined;
+    const admin = (await db.execute({ sql: "SELECT * FROM admin_users WHERE email=? AND password=?", args: [email, password] })).rows[0] as unknown as {id:string;name:string;email:string;role:string}|undefined;
     if (!admin) return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
 
     await db.execute({ sql: "UPDATE admin_users SET last_login=datetime('now') WHERE id=?", args: [admin.id] });
@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
   const session = req.cookies.get("admin_session")?.value;
   if (!session) return NextResponse.json({ authenticated: false }, { status: 401 });
   const db = getDb();
-  const admin = (await db.execute({ sql: "SELECT id,name,email,role,last_login FROM admin_users WHERE id=?", args: [session] })).rows[0] as {id:string;name:string;email:string;role:string;last_login:string}|undefined;
+  const admin = (await db.execute({ sql: "SELECT id,name,email,role,last_login FROM admin_users WHERE id=?", args: [session] })).rows[0] as unknown as {id:string;name:string;email:string;role:string;last_login:string}|undefined;
   if (!admin) return NextResponse.json({ authenticated: false }, { status: 401 });
   return NextResponse.json({ authenticated: true, admin });
 }

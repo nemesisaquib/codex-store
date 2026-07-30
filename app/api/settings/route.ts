@@ -58,7 +58,7 @@ export async function GET() {
       });
     }
 
-    const rows = (await db.execute("SELECT * FROM settings ORDER BY group_name, key")).rows as {key:string;value:string;group_name:string}[];
+    const rows = (await db.execute("SELECT * FROM settings ORDER BY group_name, key")).rows as unknown as {key:string;value:string;group_name:string}[];
     const grouped: Record<string, Record<string,string>> = {};
     for (const r of rows) {
       if (!grouped[r.group_name]) grouped[r.group_name] = {};

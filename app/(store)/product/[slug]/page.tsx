@@ -5,9 +5,10 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { Heart, ShoppingBag, Star, Shield, RotateCcw, Truck, ChevronDown, ChevronUp, Share2, MapPin } from "lucide-react";
 import ProductCard from "@/components/store/ProductCard";
-import { toProduct, safeJsonArray, type ApiProduct } from "@/lib/api";
+import { toProduct, safeJsonArray, getProductGallery, type ApiProduct } from "@/lib/api";
 import { useSettings } from "@/lib/SettingsContext";
 import { useCountry } from "@/lib/CountryContext";
+import { getOptimizedImageUrl } from "@/lib/imageUtils";
 
 interface Review { id:string; rating:number; title:string|null; comment:string|null; created_at:string; first_name:string; last_name:string }
 
@@ -82,9 +83,9 @@ export default function ProductViewPage() {
   const discount = product.compare_price
     ? Math.round((1 - product.price / product.compare_price) * 100)
     : null;
-  const extraImgs: string[] = safeJsonArray(product.gallery);
-  const realImgs = [product.image_url, product.image_url2, ...extraImgs].filter(Boolean) as string[];
-  const gallery = realImgs.length ? realImgs : [];
+  const gallery = getProductGallery(product);
+
+  const mainImageSrc = getOptimizedImageUrl(gallery[activeImg] ?? gallery[0], { width: 1200, quality: 90 });
 
   const attrs: {key:string,value:string}[] = safeJsonArray(product.attributes);
   const opts: {name:string,values:string[]}[] = safeJsonArray(product.options);
@@ -151,18 +152,18 @@ export default function ProductViewPage() {
           <div className="flex gap-4 lg:sticky lg:top-[120px] lg:h-fit">
             {/* Thumbnails */}
             <div className="hidden md:flex flex-col gap-3">
-              {(gallery.length ? gallery : ["https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&q=80"]).map((g,i) => (
+              {gallery.map((g, i) => (
                 <button key={i} onClick={() => setActiveImg(i)}
                   className={`w-20 h-24 rounded-xl flex-shrink-0 border-2 overflow-hidden transition-all relative bg-slate-50 dark:bg-neutral-900 border-slate-200/70 dark:border-neutral-800 ${activeImg===i?"border-[#e02020] ring-2 ring-[#e02020]/20":"hover:border-neutral-400"}`}>
-                  <img src={g} alt="" className="absolute inset-0 w-full h-full object-contain p-1.5" onError={e=>(e.currentTarget.style.display="none")}/>
+                  <img src={getOptimizedImageUrl(g, { width: 250, quality: 80 })} alt="" className="absolute inset-0 w-full h-full object-contain p-1.5" onError={e=>(e.currentTarget.style.display="none")}/>
                 </button>
               ))}
             </div>
             {/* Main image */}
             <div className="flex-1 rounded-2xl overflow-hidden aspect-[4/5] relative bg-gradient-to-b from-slate-50 via-slate-50/50 to-slate-100/80 dark:from-neutral-900 dark:to-neutral-950 border border-slate-200/60 dark:border-neutral-800 shadow-sm p-4 md:p-8">
               <img
-                key={gallery[activeImg] ?? gallery[0] ?? "fallback"}
-                src={gallery[activeImg] ?? gallery[0] ?? "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&q=80"}
+                key={mainImageSrc}
+                src={mainImageSrc}
                 alt={product.name}
                 className="w-full h-full object-contain drop-shadow-sm transition-transform duration-500 hover:scale-105"
                 onError={e=>(e.currentTarget.style.display="none")}
@@ -222,7 +223,7 @@ export default function ProductViewPage() {
                 <div key={opt.name} className="mb-6">
                   <p className="text-xs font-bold tracking-wider uppercase text-neutral-600 dark:text-neutral-400 mb-3">{opt.name}</p>
                   <div className={`flex flex-wrap ${isColor ? 'gap-2.5' : 'gap-3'}`}>
-                    {opt.values.map(val => (
+                    {opt.values.map((val: string) => (
                       <button key={val} title={val} onClick={() => setSelectedOptions(p => ({...p, [opt.name]: val}))}
                         className={isColor ? `w-8 h-8 rounded-full border-2 shadow-sm transition-all ${selectedOptions[opt.name] === val ? 'border-[#e02020] scale-110' : 'border-white dark:border-neutral-800 hover:scale-110'}` 
                         : `min-w-[3.5rem] h-12 px-4 border rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center ${selectedOptions[opt.name] === val ? "border-neutral-900 bg-neutral-900 text-white dark:border-white dark:bg-white dark:text-neutral-900 shadow-md scale-105" : "border-neutral-200 text-neutral-600 hover:border-neutral-900 hover:text-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:hover:border-white dark:hover:text-white"}`}
@@ -300,11 +301,11 @@ export default function ProductViewPage() {
                     if (!pinCode) return;
                     setPinStatus("loading");
                     try {
-                      const res = await fetch(`/api/geocode?pin=${encodeURIComponent(pinCode)}&country=${encodeURIComponent(country.code)}`);
+                      const res = await fetch(`/api/geocode?pin=${encodeURIComponent(pinCode)}&country=${encodeURIComponent(country?.code || "")}`);
                       const data = await res.json();
                       if (data?.error) {
                         setPinStatus("error");
-                        setLocationName(`Invalid PIN code for ${country.name}`);
+                        setLocationName(`Invalid PIN code for ${country?.name || "selected country"}`);
                       } else if (data && data.location) {
                         setLocationName(data.location);
                         setPinStatus("success");

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { TrendingUp, Users, ShoppingBag, Target, Globe, Smartphone, Monitor } from "lucide-react";
+import { useSettings } from "@/lib/SettingsContext";
 
 interface Stats {
   totalRevenue: number; totalOrders: number; totalCustomers: number;
@@ -10,6 +11,7 @@ interface Stats {
 }
 
 export default function AdminAnalyticsPage() {
+  const { formatPrice } = useSettings();
   const [stats, setStats] = useState<Stats|null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -29,10 +31,10 @@ export default function AdminAnalyticsPage() {
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
         {[
-          {icon:TrendingUp, label:"Total Revenue",    value: stats?`$${stats.totalRevenue.toLocaleString(undefined,{maximumFractionDigits:0})}`:"—",  color:"#e02020"},
+          {icon:TrendingUp, label:"Total Revenue",    value: stats ? formatPrice(stats.totalRevenue) : "—",  color:"#e02020"},
           {icon:ShoppingBag,label:"Total Orders",     value: stats?.totalOrders??"—",                                                                    color:"#3b82f6"},
           {icon:Users,       label:"Customers",        value: stats?.totalCustomers??"—",                                                                  color:"#22c55e"},
-          {icon:Target,      label:"Avg Order Value",  value: stats?`$${stats.avgOrder.toFixed(0)}`:"—",                                                   color:"#f59e0b"},
+          {icon:Target,      label:"Avg Order Value",  value: stats ? formatPrice(stats.avgOrder) : "—",                                                   color:"#f59e0b"},
         ].map(({icon:Icon,label,value,color}) => (
           <div key={label} className="bg-white dark:bg-neutral-900 rounded-2xl p-5">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{background:`${color}18`}}>
@@ -84,7 +86,7 @@ export default function AdminAnalyticsPage() {
                   <span className="font-medium text-neutral-700 dark:text-neutral-300">{category}</span>
                   <div className="flex gap-3">
                     <span className="font-bold text-neutral-900 dark:text-white">{count} items</span>
-                    <span className="text-neutral-400">avg ${avg_price.toFixed(0)}</span>
+                    <span className="text-neutral-400">avg {formatPrice(avg_price)}</span>
                   </div>
                 </div>
                 <div className="h-2.5 bg-neutral-100 dark:bg-neutral-800 rounded-full overflow-hidden">
@@ -128,7 +130,7 @@ export default function AdminAnalyticsPage() {
                 <p className="text-xs text-neutral-400 mt-0.5">{p.reviews} reviews</p>
               </div>
               <div className="text-right flex-shrink-0">
-                <p className="font-bold text-sm text-neutral-900 dark:text-white">${p.price}</p>
+                <p className="font-bold text-sm text-neutral-900 dark:text-white">{formatPrice(p.price)}</p>
                 <p className="text-[10px] text-[#d4a017]">⭐ {p.rating}</p>
               </div>
               <div className="w-24">

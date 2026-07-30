@@ -17,8 +17,28 @@ export function getDb(): Client {
     authToken: process.env.TURSO_AUTH_TOKEN,
   });
 
-  // Lazy schema migration for categories, brands, and product taxonomy columns
+  // Lazy schema migration & favicon sync
   (async () => {
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      const srcIco = path.join(process.cwd(), 'public/favicon/favicon.ico');
+      const destPublicIco = path.join(process.cwd(), 'public/favicon.ico');
+      const destAppIco = path.join(process.cwd(), 'app/favicon.ico');
+      const srcApple = path.join(process.cwd(), 'public/favicon/apple-touch-icon.png');
+      const destPublicApple = path.join(process.cwd(), 'public/apple-touch-icon.png');
+      const destAppApple = path.join(process.cwd(), 'app/apple-icon.png');
+
+      if (fs.existsSync(srcIco)) {
+        if (!fs.existsSync(destPublicIco)) fs.copyFileSync(srcIco, destPublicIco);
+        if (!fs.existsSync(destAppIco)) fs.copyFileSync(srcIco, destAppIco);
+      }
+      if (fs.existsSync(srcApple)) {
+        if (!fs.existsSync(destPublicApple)) fs.copyFileSync(srcApple, destPublicApple);
+        if (!fs.existsSync(destAppApple)) fs.copyFileSync(srcApple, destAppApple);
+      }
+    } catch {}
+
     try {
       // Create categories table
       await _db!.execute(`
@@ -44,6 +64,29 @@ export function getDb(): Client {
           description TEXT DEFAULT NULL,
           is_featured INTEGER DEFAULT 0,
           created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+
+      // Create blog_posts table
+      await _db!.execute(`
+        CREATE TABLE IF NOT EXISTS blog_posts (
+          id TEXT PRIMARY KEY,
+          title TEXT NOT NULL,
+          slug TEXT UNIQUE NOT NULL,
+          author TEXT DEFAULT 'E-shop Editorial',
+          category TEXT DEFAULT 'Fashion Guides',
+          tags TEXT,
+          featured_image TEXT,
+          excerpt TEXT,
+          content TEXT NOT NULL,
+          status TEXT DEFAULT 'published',
+          views INTEGER DEFAULT 0,
+          read_time INTEGER DEFAULT 5,
+          meta_title TEXT,
+          meta_desc TEXT,
+          meta_keywords TEXT,
+          created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+          updated_at TEXT DEFAULT CURRENT_TIMESTAMP
         )
       `);
 

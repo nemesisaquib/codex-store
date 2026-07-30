@@ -14,7 +14,7 @@ export async function GET() {
     const notifs: Notif[] = [];
 
     // Recent orders (last 5)
-    const orders = (await db.execute("SELECT id,order_number,customer_name,total,status,created_at FROM orders ORDER BY created_at DESC LIMIT 5")).rows as {id:string;order_number:string;customer_name:string;total:number;status:string;created_at:string}[];
+    const orders = (await db.execute("SELECT id,order_number,customer_name,total,status,created_at FROM orders ORDER BY created_at DESC LIMIT 5")).rows as unknown as {id:string;order_number:string;customer_name:string;total:number;status:string;created_at:string}[];
     for (const o of orders) {
       notifs.push({
         id: `order-${o.id}`, type: "order",
@@ -25,7 +25,7 @@ export async function GET() {
     }
 
     // Low stock alerts
-    const low = (await db.execute("SELECT id,name,stock,created_at FROM products WHERE stock<=10 AND status='active' ORDER BY stock ASC LIMIT 5")).rows as {id:string;name:string;stock:number;created_at:string}[];
+    const low = (await db.execute("SELECT id,name,stock,created_at FROM products WHERE stock<=10 AND status='active' ORDER BY stock ASC LIMIT 5")).rows as unknown as {id:string;name:string;stock:number;created_at:string}[];
     for (const p of low) {
       notifs.push({
         id: `stock-${p.id}`, type: "stock",
@@ -36,7 +36,7 @@ export async function GET() {
     }
 
     // New customers (last 3)
-    const newCust = (await db.execute("SELECT id,first_name,last_name,created_at FROM customers WHERE tier='new' ORDER BY created_at DESC LIMIT 3")).rows as {id:string;first_name:string;last_name:string;created_at:string}[];
+    const newCust = (await db.execute("SELECT id,first_name,last_name,created_at FROM customers WHERE tier='new' ORDER BY created_at DESC LIMIT 3")).rows as unknown as {id:string;first_name:string;last_name:string;created_at:string}[];
     for (const c of newCust) {
       notifs.push({
         id: `cust-${c.id}`, type: "customer",
@@ -47,7 +47,7 @@ export async function GET() {
     }
 
     // Newsletter signups (last 3)
-    const subs = (await db.execute("SELECT id,email,created_at FROM newsletter ORDER BY created_at DESC LIMIT 3")).rows as {id:string;email:string;created_at:string}[];
+    const subs = (await db.execute("SELECT id,email,created_at FROM newsletter ORDER BY created_at DESC LIMIT 3")).rows as unknown as {id:string;email:string;created_at:string}[];
     for (const s of subs) {
       notifs.push({
         id: `sub-${s.id}`, type: "newsletter",

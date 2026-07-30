@@ -82,7 +82,30 @@ export default function AdminOrdersPage() {
           <button onClick={() => fetchOrders()} disabled={loading} className="p-2.5 bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-neutral-600 dark:text-neutral-300 rounded-xl transition-colors" title="Refresh Orders">
             <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
           </button>
-          <button className="flex items-center gap-2 px-4 py-2.5 border border-neutral-200 dark:border-neutral-700 rounded-xl text-sm font-medium hover:border-[#e02020] transition-colors">
+          <button
+            onClick={() => {
+              if (!orders.length) return;
+              const headers = ["Order Number", "Customer", "Email", "Total", "Status", "Payment Status", "Created At"];
+              const rows = orders.map(o => [
+                o.order_number,
+                `"${(o.customer_name || "").replace(/"/g, '""')}"`,
+                o.customer_email || "",
+                o.total,
+                o.status,
+                o.payment_status,
+                o.created_at
+              ]);
+              const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+              const encodedUri = encodeURI(csvContent);
+              const link = document.createElement("a");
+              link.setAttribute("href", encodedUri);
+              link.setAttribute("download", `orders-export-${Date.now()}.csv`);
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            }}
+            className="flex items-center gap-2 px-4 py-2.5 border border-neutral-200 dark:border-neutral-700 rounded-xl text-sm font-medium hover:border-[#e02020] transition-colors"
+          >
             <Download size={14}/> Export CSV
           </button>
         </div>

@@ -26,11 +26,13 @@ const cols = [
   {
     title: "Company",
     links: [
-      { label: "About Us",       href: "/about" },
-      { label: "Careers",        href: "/careers" },
-      { label: "Press",          href: "/press" },
-      { label: "Affiliates",     href: "/affiliates" },
-      { label: "Sustainability", href: "/sustainability" },
+      { label: "About Us",          href: "/about" },
+      { label: "Journal & Blog",    href: "/blog" },
+      { label: "Fashion Guides",    href: "/blog?category=Fashion%20Guides" },
+      { label: "Careers",           href: "/careers" },
+      { label: "Press",             href: "/press" },
+      { label: "Affiliates",        href: "/affiliates" },
+      { label: "Sustainability",    href: "/sustainability" },
     ],
   },
 ];

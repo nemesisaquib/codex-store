@@ -243,6 +243,7 @@ const NAV_LINKS = [
   { label: "Men",        href: "/category/men",    sub: ["Shirts", "Trousers", "Jackets", "Shoes", "Accessories"] },
   { label: "Kids",       href: "/category/kids",   sub: ["Girls", "Boys", "Babies", "Shoes"] },
   { label: "Categories", href: "/categories",      sub: ["Electronics", "Jewelry", "Shoes", "Furniture", "Groceries"] },
+  { label: "Journal",    href: "/blog",            sub: null },
   { label: "Sale",       href: "/sale",            sub: null, sale: true },
   { label: "New In",     href: "/new-arrivals",    sub: null },
   { label: "Brands",     href: "/brands",          sub: null },
@@ -343,7 +344,7 @@ export default function Navbar() {
             {/* ── Logo ── */}
             <Link href="/" className="flex-shrink-0 mr-6 lg:mr-10 group flex items-center shrink-0 w-[120px] h-[36px]" aria-label="Home">
               <img
-                src={settings.store_logo || "/Logo/Eshop.png"}
+                src={settings.store_logo || (settings as any).logo_url || "/Logo/Eshop.png"}
                 alt={`${settings.store_name || "E-shop"} Logo`}
                 className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
               />

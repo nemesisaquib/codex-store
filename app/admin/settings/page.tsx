@@ -24,10 +24,10 @@ const FIELD_LABELS: Record<string,string> = {
   store_email:"Contact Email",
   store_phone:"Phone Number",
   store_address:"Store Address",
-  currency:"Currency",
-  free_shipping_threshold:"Free Shipping Over ($)",
-  express_shipping_price:"Express Shipping ($)",
-  overnight_shipping_price:"Overnight Shipping ($)",
+  currency:"Store Currency",
+  free_shipping_threshold:"Free Shipping Threshold",
+  express_shipping_price:"Express Shipping Price",
+  overnight_shipping_price:"Overnight Shipping Price",
   tax_rate:"Tax Rate (%)",
   shipping_api_carrier:"Shipping Logistics Carrier",
   shipping_api_key:"Shipping API Secret Key",
@@ -474,52 +474,154 @@ export default function AdminSettingsPage() {
   );
 }
 
-/* ── SMTP Test Panel ── */
-function SmtpTestPanel({ flat }: { flat: Record<string,string> }) {
-  const [to, setTo]         = useState("");
-  const [sending, setSend]  = useState(false);
-  const [result, setResult] = useState<{ok:boolean;msg:string}|null>(null);
+/* ── Interactive Email Template Tester & Free SMTP Sandbox ── */
+function SmtpTestPanel({ flat }: { flat: Record<string, string> }) {
+  const [to, setTo] = useState("test@example.com");
+  const [template, setTemplate] = useState<"booking" | "cancellation" | "delivery" | "contact" | "test">("booking");
+  const [sending, setSend] = useState(false);
+  const [result, setResult] = useState<{ ok: boolean; msg: string; previewUrl?: string | null; isTestAccount?: boolean } | null>(null);
+
   const configured = !!flat.smtp_host && !!flat.smtp_user;
 
   const send = async () => {
     if (!to) return;
-    setSend(true); setResult(null);
-    const r = await fetch("/api/email/test", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ to }) });
-    const d = await r.json();
-    setResult(d.ok ? { ok:true, msg:`Sent! ID: ${d.messageId?.slice(0,30)??"ok"}` } : { ok:false, msg: d.error??"Failed" });
+    setSend(true);
+    setResult(null);
+    try {
+      const r = await fetch("/api/email/test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ to, template, forceTest: !configured }),
+      });
+      const d = await r.json();
+      if (d.ok) {
+        setResult({
+          ok: true,
+          msg: `Success! Message ID: ${d.messageId ? d.messageId.slice(0, 30) : "ok"}`,
+          previewUrl: d.previewUrl,
+          isTestAccount: d.isTestAccount,
+        });
+      } else {
+        setResult({ ok: false, msg: d.error || "Failed to send email." });
+      }
+    } catch (err: any) {
+      setResult({ ok: false, msg: String(err) });
+    }
     setSend(false);
   };
 
   return (
-    <div className="mt-2 p-5 bg-neutral-50 dark:bg-neutral-800/50 rounded-2xl border border-neutral-100 dark:border-neutral-700">
-      <div className="flex items-center gap-2 mb-3">
-        <Send size={14} className="text-[#e02020]"/>
-        <h3 className="text-sm font-bold text-neutral-900 dark:text-white">Send Test Email</h3>
-        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${configured ? "bg-green-100 text-green-700" : "bg-orange-100 text-orange-600"}`}>
-          {configured ? "✓ Configured" : "Save SMTP host & user first"}
-        </span>
-      </div>
-      <div className="flex gap-2">
-        <input
-          value={to}
-          onChange={e => setTo(e.target.value)}
-          placeholder="recipient@email.com"
-          type="email"
-          className="flex-1 px-4 py-2.5 border border-neutral-200 dark:border-neutral-700 rounded-xl text-sm bg-white dark:bg-neutral-800 focus:outline-none focus:border-[#e02020]"
-        />
-        <button
-          onClick={send}
-          disabled={sending || !to || !configured}
-          className={`px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors ${
-            !to || !configured ? "bg-neutral-200 text-neutral-400 cursor-not-allowed" : "bg-[#e02020] hover:bg-[#c01a1a] text-white"
+    <div className="mt-6 p-6 bg-neutral-50 dark:bg-neutral-800/40 rounded-2xl border border-neutral-200/80 dark:border-neutral-700/60 space-y-5">
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-[#e02020]/10 flex items-center justify-center text-[#e02020]">
+            <Send size={16} />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-neutral-900 dark:text-white">Email Template Tester & SMTP Sandbox</h3>
+            <p className="text-xs text-neutral-400">Test transactional emails & inspect HTML templates instantly</p>
+          </div>
+        </div>
+        <span
+          className={`text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5 ${
+            configured ? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400" : "bg-purple-100 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300"
           }`}
         >
-          <Send size={13}/>{sending ? "Sending…" : "Send Test"}
-        </button>
+          {configured ? "✓ Custom SMTP Active" : "⚡ Free Ethereal Test Server Active"}
+        </span>
       </div>
+
+      {!configured && (
+        <div className="p-3.5 bg-purple-50/70 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800/40 rounded-xl text-xs text-purple-800 dark:text-purple-300 flex items-start gap-2.5">
+          <span className="text-base">💡</span>
+          <div>
+            <strong>Zero-Config Free Test Mailer Active:</strong> Custom SMTP fields are currently empty, so emails will be sent via an automatic <strong>Ethereal Email</strong> test server. A clickable <strong>Live Preview Link</strong> will be generated for every email sent!
+          </div>
+        </div>
+      )}
+
+      {/* Select Template */}
+      <div>
+        <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">Select Email Template to Test</label>
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+          {[
+            { id: "booking", label: "🛍️ Order Booking", desc: "Confirmation" },
+            { id: "cancellation", label: "❌ Order Cancel", desc: "Refund Notice" },
+            { id: "delivery", label: "🚚 Order Delivery", desc: "Shipment Tracking" },
+            { id: "contact", label: "📩 Contact Form", desc: "Customer Inquiry" },
+            { id: "test", label: "🚀 System Test", desc: "Basic SMTP Ping" },
+          ].map(t => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setTemplate(t.id as any)}
+              className={`p-3 text-left rounded-xl border transition-all ${
+                template === t.id
+                  ? "border-[#e02020] bg-white dark:bg-neutral-900 shadow-sm ring-2 ring-[#e02020]/10 font-bold"
+                  : "border-neutral-200 dark:border-neutral-700 bg-white/50 dark:bg-neutral-800/50 hover:border-neutral-300"
+              }`}
+            >
+              <div className="text-xs text-neutral-900 dark:text-white truncate">{t.label}</div>
+              <div className="text-[10px] text-neutral-400 font-normal mt-0.5 truncate">{t.desc}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Recipient + Send */}
+      <div className="flex gap-2 flex-wrap sm:flex-nowrap">
+        <div className="flex-1 min-w-[200px]">
+          <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1">Recipient Email</label>
+          <input
+            value={to}
+            onChange={e => setTo(e.target.value)}
+            placeholder="recipient@example.com"
+            type="email"
+            className="w-full px-4 py-2.5 border border-neutral-200 dark:border-neutral-700 rounded-xl text-sm bg-white dark:bg-neutral-900 focus:outline-none focus:border-[#e02020]"
+          />
+        </div>
+        <div className="flex items-end">
+          <button
+            onClick={send}
+            disabled={sending || !to}
+            className={`w-full sm:w-auto px-6 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${
+              !to ? "bg-neutral-200 text-neutral-400 cursor-not-allowed" : "bg-[#e02020] hover:bg-[#c01a1a] text-white shadow-lg shadow-[#e02020]/20"
+            }`}
+          >
+            <Send size={14} />
+            {sending ? "Sending Test Mail…" : "Send Test Email"}
+          </button>
+        </div>
+      </div>
+
+      {/* Result & Ethereal Live Preview Button */}
       {result && (
-        <div className={`mt-3 text-xs px-4 py-3 rounded-xl font-medium ${result.ok ? "bg-green-50 text-green-700 border border-green-200" : "bg-red-50 text-red-600 border border-red-200"}`}>
-          {result.ok ? "✅ " : "❌ "}{result.msg}
+        <div
+          className={`p-4 rounded-xl border space-y-2.5 ${
+            result.ok
+              ? "bg-green-50 dark:bg-green-950/20 text-green-800 dark:text-green-300 border-green-200 dark:border-green-800/40"
+              : "bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800/40"
+          }`}
+        >
+          <div className="flex items-center gap-2 text-xs font-bold">
+            <span>{result.ok ? "✅" : "❌"}</span>
+            <span>{result.msg}</span>
+          </div>
+
+          {result.ok && result.previewUrl && (
+            <div className="pt-2 border-t border-green-200/60 dark:border-green-800/40 flex items-center justify-between flex-wrap gap-2">
+              <span className="text-xs text-green-700 dark:text-green-400">View the exact rendered HTML email in your browser:</span>
+              <a
+                href={result.previewUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-green-700 hover:bg-green-800 text-white rounded-lg text-xs font-bold shadow-sm transition-colors"
+              >
+                <span>🌐 Open Ethereal Email Live Preview</span>
+                <span className="text-xs">↗</span>
+              </a>
+            </div>
+          )}
         </div>
       )}
     </div>

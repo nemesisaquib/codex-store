@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
     }
 
     const db = getDb();
-    const customer = (await db.execute({ sql: "SELECT id,first_name FROM customers WHERE email=?", args: [email] })).rows[0] as {id:string;first_name:string}|undefined;
+    const customer = (await db.execute({ sql: "SELECT id,first_name FROM customers WHERE email=?", args: [email] })).rows[0] as unknown as {id:string;first_name:string}|undefined;
 
     // Always return ok — don't reveal if email exists (security)
     if (!customer) {
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     await db.execute({ sql: "INSERT INTO reset_tokens (token,customer_id,expires) VALUES (?,?,?)", args: [token, customer.id, expires] });
 
     // Send email if SMTP configured
-    if (getSmtpConfig()) {
+    if (await getSmtpConfig()) {
       const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3004"));
       const url = `${baseUrl}/auth/reset?token=${token}`;
       const html = emailTemplate(

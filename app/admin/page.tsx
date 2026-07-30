@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import { TrendingUp, ShoppingCart, Users, Package, AlertTriangle, ArrowUpRight, ArrowDownRight, RefreshCw } from "lucide-react";
 import Link from "next/link";
+import { useSettings } from "@/lib/SettingsContext";
+import { getOptimizedImageUrl } from "@/lib/imageUtils";
 
 interface Stats {
   totalRevenue: number; todayRevenue: number;
@@ -22,6 +24,7 @@ const S: Record<string,string> = {
 };
 
 export default function AdminDashboard() {
+  const { formatPrice } = useSettings();
   const [stats, setStats]   = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [livePolling, setLive] = useState(false);
@@ -42,9 +45,9 @@ export default function AdminDashboard() {
   }, []);
 
   const cards = [
-    {label:"Total Revenue",  value:stats?`$${stats.totalRevenue.toLocaleString(undefined,{maximumFractionDigits:0})}`:"—", sub:`$${(stats?.todayRevenue??0).toFixed(0)} today`, icon:TrendingUp,   color:"#e02020", up:true},
+    {label:"Total Revenue",  value:stats?formatPrice(stats.totalRevenue):"—", sub:`${formatPrice(stats?.todayRevenue??0)} today`, icon:TrendingUp,   color:"#e02020", up:true},
     {label:"Orders",         value:stats?.totalOrders??"—",       sub:`${stats?.pendingOrders??0} pending`,       icon:ShoppingCart, color:"#3b82f6", up:true},
-    {label:"Customers",      value:stats?.totalCustomers??"—",    sub:`Avg order $${(stats?.avgOrder??0).toFixed(0)}`, icon:Users, color:"#22c55e", up:true},
+    {label:"Customers",      value:stats?.totalCustomers??"—",    sub:`Avg order ${formatPrice(stats?.avgOrder??0)}`, icon:Users, color:"#22c55e", up:true},
     {label:"Low Stock",      value:stats?.lowStock??"—",          sub:"Items below 10 units",                     icon:AlertTriangle,color:"#f59e0b", up:false},
   ];
 
@@ -97,7 +100,7 @@ export default function AdminDashboard() {
             <span className="text-xs text-neutral-400">Last 30 days</span>
           </div>
           <p className="text-2xl font-display font-black text-neutral-900 dark:text-white mb-6">
-            ${stats?.totalRevenue.toLocaleString(undefined,{maximumFractionDigits:0}) ?? "—"}
+            {stats ? formatPrice(stats.totalRevenue) : "—"}
           </p>
           {/* Bar chart */}
           <div className="flex items-end gap-1.5 h-32">
@@ -162,7 +165,7 @@ export default function AdminDashboard() {
                   <p className="text-xs text-neutral-500 mt-0.5">{o.customer_name}</p>
                 </div>
                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full capitalize ${S[o.status]??S.pending}`}>{o.status}</span>
-                <p className="font-bold text-sm text-neutral-900 dark:text-white">${o.total}</p>
+                <p className="font-bold text-sm text-neutral-900 dark:text-white">{formatPrice(o.total)}</p>
                 <p className="text-[10px] text-neutral-400">{new Date(o.created_at).toLocaleDateString()}</p>
               </div>
             ))}
@@ -183,16 +186,16 @@ export default function AdminDashboard() {
                 <span className="w-5 text-[10px] font-bold text-neutral-400 flex-shrink-0">{i+1}</span>
                 <div className="w-10 h-12 rounded-lg flex-shrink-0 overflow-hidden bg-neutral-100 dark:bg-neutral-800">
                   {p.image_url ? (
-                    <img src={p.image_url} alt={p.name} className="w-full h-full object-cover" loading="lazy"/>
+                    <img src={getOptimizedImageUrl(p.image_url, { width: 150, quality: 80 })} alt={p.name} className="w-full h-full object-contain p-0.5" loading="lazy"/>
                   ) : (
-                    <div className="w-full h-full bg-neutral-200"/>
+                    <div className="w-full h-full bg-neutral-200 dark:bg-neutral-800"/>
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium text-neutral-900 dark:text-white truncate">{p.name}</p>
                   <p className="text-[10px] text-neutral-400">{p.reviews} reviews · ⭐ {p.rating}</p>
                 </div>
-                <p className="text-xs font-bold text-neutral-900 dark:text-white flex-shrink-0">${p.price}</p>
+                <p className="text-xs font-bold text-neutral-900 dark:text-white flex-shrink-0">{formatPrice(p.price)}</p>
               </div>
             ))}
           </div>

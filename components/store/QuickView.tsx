@@ -4,7 +4,8 @@ import { createPortal } from "react-dom";
 import { X, ShoppingBag, Share2, Minus, Plus, ChevronLeft, ChevronRight, ArrowUpRight } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
-import { safeJsonArray } from "@/lib/api";
+import { safeJsonArray, getProductGallery } from "@/lib/api";
+import { getOptimizedImageUrl } from "@/lib/imageUtils";
 
 interface Product {
   id: string; slug: string; name: string; brand: string;
@@ -39,9 +40,10 @@ const QuickView = memo(({ product, open, onClose }: QuickViewProps) => {
     return () => { document.removeEventListener("keydown", fn); document.body.style.overflow = ""; };
   }, [open, onClose]);
 
-  const images = [product.image_url, product.image_url2].filter(Boolean) as string[];
-  const colors = safeJsonArray(product.colors);
-  const discount = product.compare_price
+  const rawImages = getProductGallery(product);
+  const images = rawImages.map(img => getOptimizedImageUrl(img, { width: 1000, quality: 85 }));
+  const colors = safeJsonArray(product?.colors);
+  const discount = product?.compare_price && product?.price
     ? Math.round(((product.compare_price - product.price) / product.compare_price) * 100) : 0;
 
   const addCart = useCallback(async () => {

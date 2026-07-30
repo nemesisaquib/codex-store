@@ -117,12 +117,7 @@ function buildContent(slug: string): PageContent | null {
         icon: Mail, title: "Contact Us", subtitle: "We're here to help",
         body: (
           <div className="grid md:grid-cols-2 gap-8">
-            <div className="space-y-4">
-              <input placeholder="Your name" className="w-full px-4 py-3 border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-900 text-sm focus:outline-none focus:border-[#e02020]" />
-              <input placeholder="Email address" type="email" className="w-full px-4 py-3 border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-900 text-sm focus:outline-none focus:border-[#e02020]" />
-              <textarea placeholder="How can we help?" rows={5} className="w-full px-4 py-3 border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-900 text-sm focus:outline-none focus:border-[#e02020] resize-none" />
-              <button className="w-full py-3 bg-[#e02020] hover:bg-[#c01a1a] text-white font-semibold rounded-xl text-sm transition-colors">Send Message</button>
-            </div>
+            <ContactFormClient />
             <div className="space-y-5 text-sm text-neutral-600 dark:text-neutral-400">
               <div><p className="font-semibold text-neutral-900 dark:text-white mb-1">Email</p><p>support@codex-store.com</p></div>
               <div><p className="font-semibold text-neutral-900 dark:text-white mb-1">Phone</p><p>+1 (800) 555-E-shop</p></div>
@@ -207,6 +202,67 @@ function FAQAccordion() {
         </div>
       ))}
     </div>
+  );
+}
+
+function ContactFormClient() {
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState<{ ok?: boolean; message?: string; previewUrl?: string | null } | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    setStatus(null);
+    const fd = new FormData(e.currentTarget);
+    const name = fd.get("name")?.toString().trim();
+    const email = fd.get("email")?.toString().trim();
+    const message = fd.get("message")?.toString().trim();
+
+    if (!name || !email || !message) {
+      setStatus({ ok: false, message: "Please fill out all fields before sending." });
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, message }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setStatus({ ok: true, message: data.message, previewUrl: data.mailStatus?.previewUrl });
+        (e.target as HTMLFormElement).reset();
+      } else {
+        setStatus({ ok: false, message: data.error || "Failed to send message. Please try again." });
+      }
+    } catch (e) {
+      setStatus({ ok: false, message: "Network error occurred. Please check your connection." });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {status && (
+        <div className={`p-4 rounded-xl text-sm ${status.ok ? "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400"}`}>
+          <p>{status.message}</p>
+          {status.previewUrl && (
+            <a href={status.previewUrl} target="_blank" rel="noreferrer" className="underline mt-2 inline-block font-semibold">
+              View Free SMTP Test Email (Ethereal)
+            </a>
+          )}
+        </div>
+      )}
+      <input name="name" placeholder="Your name" className="w-full px-4 py-3 border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-900 text-sm focus:outline-none focus:border-[#e02020]" />
+      <input name="email" placeholder="Email address" type="email" className="w-full px-4 py-3 border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-900 text-sm focus:outline-none focus:border-[#e02020]" />
+      <textarea name="message" placeholder="How can we help?" rows={5} className="w-full px-4 py-3 border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-900 text-sm focus:outline-none focus:border-[#e02020] resize-none" />
+      <button disabled={loading} type="submit" className="w-full py-3 bg-[#e02020] hover:bg-[#c01a1a] disabled:opacity-50 text-white font-semibold rounded-xl text-sm transition-colors">
+        {loading ? "Sending..." : "Send Message"}
+      </button>
+    </form>
   );
 }
 

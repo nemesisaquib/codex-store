@@ -5,6 +5,7 @@ import CloudinaryUpload from "@/components/admin/CloudinaryUpload";
 import { safeJsonArray } from "@/lib/api";
 import { toast } from "sonner";
 import { useSettings } from "@/lib/SettingsContext";
+import { getOptimizedImageUrl } from "@/lib/imageUtils";
 
 interface Option { name: string; values: string[]; }
 interface Attribute { key: string; value: string; }
@@ -175,8 +176,8 @@ export default function AdminProductsPage() {
                   <td className="px-4 py-4"><input type="checkbox" className="accent-[#e02020]"/></td>
                   <td className="px-4 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-12 rounded-lg flex-shrink-0 overflow-hidden bg-neutral-100">
-                        {p.image_url ? <img src={p.image_url} alt={p.name} className="w-full h-full object-cover" loading="lazy"/> : <div className="w-full h-full" style={{background:`linear-gradient(160deg,${p.color??"#c4a882"},${p.color??"#c4a882"}88)`}}/>}
+                      <div className="w-10 h-12 rounded-lg flex-shrink-0 overflow-hidden bg-neutral-100 dark:bg-neutral-800">
+                        {p.image_url ? <img src={getOptimizedImageUrl(p.image_url, { width: 150, quality: 80 })} alt={p.name} className="w-full h-full object-contain p-0.5" loading="lazy"/> : <div className="w-full h-full" style={{background:`linear-gradient(160deg,${p.color??"#c4a882"},${p.color??"#c4a882"}88)`}}/>}
                       </div>
                       <div>
                         <p className="text-sm font-medium text-neutral-900 dark:text-white">{p.name}</p>

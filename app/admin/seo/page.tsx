@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Globe, Search, Check, Edit2, ExternalLink, RefreshCw, Image } from "lucide-react";
+import { Globe, Search, Check, Edit2, ExternalLink, RefreshCw, Image, Sparkles } from "lucide-react";
+import { getOptimizedImageUrl } from "@/lib/imageUtils";
 
 interface SeoPage { id:string;page:string;title:string;description:string;og_title:string;og_desc:string;og_image:string;canonical:string;robots:string }
 interface SeoProduct { id:string;name:string;slug:string;meta_title:string|null;meta_desc:string|null;og_image:string|null;image_url:string|null }
@@ -23,6 +24,7 @@ export default function AdminSeoPage() {
   const [form,     setForm]     = useState<Record<string,string>>({});
   const [saving,   setSaving]   = useState(false);
   const [saved,    setSaved]    = useState(false);
+  const [aiGenerating, setAiGenerating] = useState(false);
   const [search,   setSearch]   = useState("");
 
   const load = () => {
@@ -35,6 +37,28 @@ export default function AdminSeoPage() {
     setForm("page" in item
       ? {title:item.title??"",description:item.description??"",og_title:item.og_title??"",og_desc:item.og_desc??"",og_image:item.og_image??"",robots:item.robots??"index,follow"}
       : {meta_title:item.meta_title??"",meta_desc:item.meta_desc??"",og_image:item.og_image??""});
+  };
+
+  const generateAiSeo = async () => {
+    if (!editing) return;
+    setAiGenerating(true);
+    const itemTitle = "page" in editing ? editing.page : (editing as SeoProduct).name;
+    try {
+      const res = await fetch("/api/admin/ai-seo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: itemTitle })
+      });
+      const data = await res.json();
+      if (data.ok) {
+        if ("page" in editing) {
+          setForm(p => ({ ...p, title: data.metaTitle, description: data.metaDesc, og_title: data.ogTitle, og_desc: data.ogDesc }));
+        } else {
+          setForm(p => ({ ...p, meta_title: data.metaTitle, meta_desc: data.metaDesc }));
+        }
+      }
+    } catch {}
+    setAiGenerating(false);
   };
 
   const save = async () => {
@@ -143,7 +167,7 @@ export default function AdminSeoPage() {
                   <tr key={p.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
-                        {p.image_url && <img src={p.image_url} alt={p.name} className="w-8 h-10 rounded-lg object-cover flex-shrink-0" loading="lazy"/>}
+                        {p.image_url && <img src={getOptimizedImageUrl(p.image_url, { width: 150, quality: 80 })} alt={p.name} className="w-8 h-10 rounded-lg object-contain p-0.5 bg-neutral-100 dark:bg-neutral-800 flex-shrink-0" loading="lazy"/>}
                         <div><p className="text-sm font-medium text-neutral-900 dark:text-white">{p.name}</p><code className="text-[10px] text-neutral-400">/product/{p.slug}</code></div>
                       </div>
                     </td>
@@ -172,7 +196,17 @@ export default function AdminSeoPage() {
                 <h2 className="font-semibold text-neutral-900 dark:text-white">Edit SEO</h2>
                 <p className="text-xs text-neutral-400 mt-0.5">{"page" in editing ? editing.page : (editing as SeoProduct).name}</p>
               </div>
-              <button onClick={()=>setEditing(null)} className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-xl">✕</button>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={generateAiSeo}
+                  disabled={aiGenerating}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-[#e02020]/10 text-[#e02020] hover:bg-[#e02020] hover:text-white rounded-xl text-xs font-bold transition-all"
+                >
+                  <Sparkles size={13} /> {aiGenerating ? "Generating..." : "✨ AI Generate SEO"}
+                </button>
+                <button onClick={()=>setEditing(null)} className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-xl">✕</button>
+              </div>
             </div>
             <div className="p-6 space-y-4">
               {"page" in editing ? (

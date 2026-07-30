@@ -5,8 +5,8 @@ export async function GET() {
   try {
     const db = getDb();
     const products = (await db.execute("SELECT id,name,slug,brand,category,stock,status,image_url,price FROM products WHERE status!='deleted' ORDER BY stock ASC")).rows;
-    const lowStock = ((await db.execute("SELECT COUNT(*) as c FROM products WHERE stock<=10 AND status='active'")).rows[0] as {c:number}).c;
-    const outOfStock = ((await db.execute("SELECT COUNT(*) as c FROM products WHERE stock=0 AND status='active'")).rows[0] as {c:number}).c;
+    const lowStock = ((await db.execute("SELECT COUNT(*) as c FROM products WHERE stock<=10 AND status='active'")).rows[0] as unknown as {c:number}).c;
+    const outOfStock = ((await db.execute("SELECT COUNT(*) as c FROM products WHERE stock=0 AND status='active'")).rows[0] as unknown as {c:number}).c;
     return NextResponse.json({ products, lowStock, outOfStock });
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 });

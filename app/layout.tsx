@@ -36,16 +36,16 @@ export async function generateMetadata(): Promise<Metadata> {
   try {
     const db = getDb();
     const rows = (await db.execute(
-      "SELECT key, value FROM settings WHERE key IN ('store_name','store_logo','store_favicon','store_favicon_apple','meta_title','meta_desc','og_image','seo_keywords','seo_author','seo_robots')"
-    )).rows as { key: string; value: string }[];
+      "SELECT key, value FROM settings WHERE key IN ('store_name','store_logo','logo_url','store_favicon','store_favicon_apple','meta_title','meta_desc','og_image','seo_keywords','seo_author','seo_robots')"
+    )).rows as unknown as { key: string; value: string }[];
     const s = Object.fromEntries(rows.map(r => [r.key, r.value]));
 
     const name    = s.store_name   || "E-shop";
     const title   = s.meta_title   || `${name} — Wear the World | Premium Global Fashion`;
     const desc    = s.meta_desc    || "Premium international clothing eCommerce. Shop women, men, and kids fashion.";
-    const favicon = s.store_favicon       || "/favicon/favicon.ico";
+    const favicon = s.store_favicon || "/favicon/favicon.ico";
     const apple   = s.store_favicon_apple || "/favicon/apple-touch-icon.png";
-    const ogImg   = s.og_image     || "/Logo/Eshop.png";
+    const ogImg   = s.og_image || s.store_logo || s.logo_url || "/Logo/Eshop.png";
 
     return {
       title,
@@ -54,9 +54,13 @@ export async function generateMetadata(): Promise<Metadata> {
       authors: [{ name: s.seo_author || name }],
       robots: s.seo_robots || "index, follow",
       icons: {
-        icon: [{ url: favicon, sizes: "any" }],
-        shortcut: favicon,
-        apple: [{ url: apple, sizes: "180x180", type: "image/png" }],
+        icon: [
+          { url: "/favicon/favicon.ico", sizes: "any" },
+          { url: "/favicon/favicon-96x96.png", sizes: "96x96", type: "image/png" },
+          { url: "/favicon/favicon.svg", type: "image/svg+xml" },
+        ],
+        shortcut: "/favicon/favicon.ico",
+        apple: [{ url: "/favicon/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
       },
       manifest: "/favicon/site.webmanifest",
       openGraph: { type: "website", siteName: name, title, description: desc, images: [{ url: ogImg }] },
@@ -85,12 +89,12 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const db = getDb();
   let name = "E-shop";
-  let logo = "";
+  let logo = "/Logo/Eshop.png";
   try {
-    const rows = (await db.execute("SELECT key, value FROM settings WHERE key IN ('store_name', 'logo_url')")).rows as {key:string, value:string}[];
+    const rows = (await db.execute("SELECT key, value FROM settings WHERE key IN ('store_name', 'logo_url', 'store_logo')")).rows as unknown as {key:string, value:string}[];
     const s = Object.fromEntries(rows.map(r => [r.key, r.value]));
     if (s.store_name) name = s.store_name;
-    if (s.logo_url) logo = s.logo_url;
+    if (s.store_logo || s.logo_url) logo = s.store_logo || s.logo_url;
   } catch {}
 
   return (

@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
     const sort     = sp.get("sort") ?? "created_at";
 
     const where: string[] = ["status = 'active'"];
-    const params: unknown[] = [];
+    const params: any[] = [];
 
     if (category && category !== "all") {
       where.push("LOWER(category) = LOWER(?)");
@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
     const countSql = `SELECT COUNT(*) as c FROM products ${whereSql}`;
 
     const products = (await db.execute({ sql: sql, args: [...params, limit, offset] })).rows;
-    const total    = ((await db.execute({ sql: countSql, args: [...params] })).rows[0] as { c: number }).c;
+    const total    = ((await db.execute({ sql: countSql, args: [...params] })).rows[0] as unknown as { c: number }).c;
 
     return NextResponse.json({ products, total });
   } catch (e) {

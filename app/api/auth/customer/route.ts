@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === "login") {
-      const cust = (await db.execute({ sql: "SELECT id,password_hash,first_name FROM customers WHERE email=?", args: [email] })).rows[0] as {id:string;password_hash:string;first_name:string}|undefined;
+      const cust = (await db.execute({ sql: "SELECT id,password_hash,first_name FROM customers WHERE email=?", args: [email] })).rows[0] as unknown as {id:string;password_hash:string;first_name:string}|undefined;
       if (!cust || cust.password_hash !== hashPassword(password)) {
         return NextResponse.json({ ok: false, error: "Invalid email or password" }, { status: 401 });
       }
@@ -60,7 +60,7 @@ export async function GET(req: NextRequest) {
     if (!token) return NextResponse.json({ customer: null });
 
     // Check session
-    const sess = (await db.execute({ sql: "SELECT customer_id,expires FROM sessions WHERE token=?", args: [token] })).rows[0] as {customer_id:string;expires:string}|undefined;
+    const sess = (await db.execute({ sql: "SELECT customer_id,expires FROM sessions WHERE token=?", args: [token] })).rows[0] as unknown as {customer_id:string;expires:string}|undefined;
     if (!sess || new Date(sess.expires) < new Date()) {
       return NextResponse.json({ customer: null });
     }

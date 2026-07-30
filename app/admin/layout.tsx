@@ -6,7 +6,7 @@ import {
   LayoutDashboard, Package, ShoppingCart, Users, BarChart3,
   Settings, Bell, LogOut, Search, Tag, Globe, Shield,
   Warehouse, Mail, ChevronDown, ChevronRight, Store,
-  X, Menu, AlertTriangle, UserPlus, Check, MapPin, FolderTree, Bookmark
+  X, Menu, AlertTriangle, UserPlus, Check, MapPin, FolderTree, Bookmark, FileText
 } from "lucide-react";
 import { useSettings } from "@/lib/SettingsContext";
 
@@ -32,11 +32,12 @@ const NAV = [
   { href:"/admin/products",    icon:Package,         label:"Products",    badge:null },
   { href:"/admin/categories",  icon:FolderTree,      label:"Categories",  badge:null },
   { href:"/admin/brands",      icon:Bookmark,        label:"Brands",      badge:null },
+  { href:"/admin/blog",        icon:FileText,        label:"Blog CMS",    badge:"New"},
   { href:"/admin/inventory",   icon:Warehouse,       label:"Inventory",   badge:"12" },
   { href:"/admin/customers",   icon:Users,           label:"Customers",   badge:null },
   { href:"/admin/countries",   icon:MapPin,          label:"Countries",   badge:null },
   { href:"/admin/promotions",  icon:Tag,             label:"Promotions",  badge:null },
-  { href:"/admin/seo",         icon:Globe,           label:"SEO",         badge:null },
+  { href:"/admin/seo",         icon:Globe,           label:"SEO & AI",    badge:null },
   { href:"/admin/crm",         icon:Mail,            label:"CRM & Email", badge:null },
   { href:"/admin/analytics",   icon:BarChart3,       label:"Analytics",   badge:null },
   { href:"/admin/firewall",    icon:Shield,          label:"Firewall",    badge:null },
@@ -92,13 +93,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Logo */}
       <div className={`flex items-center gap-3 px-5 py-5 border-b border-neutral-800 ${collapsed?"justify-center":""}`}>
         <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden bg-neutral-900">
-          {settings.logo_url ? (
-            <img src={settings.logo_url} alt="Logo" className="w-full h-full object-contain" />
-          ) : (
-            <div className="w-full h-full bg-[#e02020] flex items-center justify-center">
-              <Store size={16} className="text-white"/>
-            </div>
-          )}
+          <img src={settings.store_logo || (settings as any).logo_url || "/Logo/Eshop.png"} alt="Logo" className="w-full h-full object-contain" />
         </div>
         {!collapsed && (
           <div>
