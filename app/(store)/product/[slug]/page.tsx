@@ -403,40 +403,6 @@ export default function ProductViewPage() {
           </div>
         )}
       </div>
-      
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org/",
-            "@type": "Product",
-            "name": product.name,
-            "image": realImgs,
-            "description": product.meta_desc || product.description,
-            "keywords": product.meta_keywords || undefined,
-            "sku": product.slug,
-            "brand": {
-              "@type": "Brand",
-              "name": product.brand || "Codex"
-            },
-            "offers": {
-              "@type": "Offer",
-              "url": `https://codex.com/product/${product.slug}`,
-              "priceCurrency": "USD",
-              "price": product.price,
-              "itemCondition": "https://schema.org/NewCondition",
-              "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
-            },
-            ...((attrs && attrs.length > 0) ? {
-              "additionalProperty": attrs.map((a: any) => ({
-                "@type": "PropertyValue",
-                "name": a.key,
-                "value": a.value
-              }))
-            } : {})
-          })
-        }}
-      />
     </div>
   );
 }

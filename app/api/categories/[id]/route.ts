@@ -27,6 +27,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     if (body.image_url !== undefined) map["image_url"] = body.image_url || null;
     if (body.description !== undefined) map["description"] = body.description || null;
     if (body.display_order !== undefined) map["display_order"] = body.display_order;
+    if (body.is_active !== undefined) map["is_active"] = body.is_active ? 1 : 0;
 
     const keys = Object.keys(map);
     if (keys.length === 0) return NextResponse.json({ ok: true });

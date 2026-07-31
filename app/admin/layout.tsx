@@ -30,6 +30,7 @@ const NAV = [
   { href:"/admin",             icon:LayoutDashboard, label:"Dashboard",   badge:null },
   { href:"/admin/orders",      icon:ShoppingCart,    label:"Orders",      badge:"3"  },
   { href:"/admin/products",    icon:Package,         label:"Products",    badge:null },
+  { href:"/admin/groceries",   icon:Store,           label:"Fresh Groceries", badge:"Fresh" },
   { href:"/admin/categories",  icon:FolderTree,      label:"Categories",  badge:null },
   { href:"/admin/brands",      icon:Bookmark,        label:"Brands",      badge:null },
   { href:"/admin/blog",        icon:FileText,        label:"Blog CMS",    badge:"New"},

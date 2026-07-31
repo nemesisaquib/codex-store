@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendEmail, contactFormTemplate } from "@/lib/email";
+import { getDb } from "@/lib/db";
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,6 +12,12 @@ export async function POST(req: NextRequest) {
     }
 
     const html = contactFormTemplate({ name, email, subject, message });
+
+    const db = getDb();
+    await db.execute({
+      sql: "INSERT INTO contact_messages (name, email, message) VALUES (?, ?, ?)",
+      args: [name, email, message]
+    });
 
     // Send notification to site admin & acknowledgment to user
     const result = await sendEmail(email, `Contact Inquiry Received: ${subject || "General Inquiry"}`, html);

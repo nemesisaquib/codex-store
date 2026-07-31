@@ -1,4 +1,5 @@
 "use client";
+import { formatDateTime } from "@/lib/dateUtils";
 import { useEffect, useState } from "react";
 import { 
   Shield, ShieldAlert, ShieldCheck, Activity, Trash2, Plus, 
@@ -551,7 +552,7 @@ export default function AdminFirewallPage() {
                       {log.rule}
                     </td>
                     <td className="py-3.5 text-neutral-400 text-[10px]">
-                      {new Date(log.created_at).toLocaleString()}
+                      {formatDateTime(log.created_at)}
                     </td>
                     <td className="py-3.5 text-right pr-2">
                       <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${

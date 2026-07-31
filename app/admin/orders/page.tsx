@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { Search, Download, Eye, X, Truck, CheckCircle, Package, Clock, RefreshCw } from "lucide-react";
 import { useSettings } from "@/lib/SettingsContext";
+import { formatDateTime, formatDate } from "@/lib/dateUtils";
 
 interface Order {
   id:string; order_number:string; customer_name:string; customer_email:string;
@@ -154,7 +155,7 @@ export default function AdminOrdersPage() {
                     </select>
                   </td>
                   <td className="px-5 py-4"><span className={`text-[10px] font-bold px-2 py-1 rounded-full capitalize ${o.payment_status==="paid"?"bg-green-100 text-green-700":"bg-yellow-100 text-yellow-700"}`}>{o.payment_status}</span></td>
-                  <td className="px-5 py-4 text-xs text-neutral-400 whitespace-nowrap">{new Date(o.created_at).toLocaleDateString()}</td>
+                  <td className="px-5 py-4 text-xs text-neutral-400 whitespace-nowrap">{formatDate(o.created_at)}</td>
                   <td className="px-5 py-4">
                     <button onClick={()=>setSelected(o)} className="p-1.5 text-neutral-400 hover:text-[#e02020] transition-colors"><Eye size={14}/></button>
                   </td>
@@ -174,7 +175,7 @@ export default function AdminOrdersPage() {
             <div className="flex items-center justify-between p-6 border-b border-neutral-200 dark:border-neutral-800 sticky top-0 bg-white dark:bg-neutral-900 z-10">
               <div>
                 <h2 className="font-semibold text-neutral-900 dark:text-white">{selected.order_number}</h2>
-                <p className="text-xs text-neutral-400">{new Date(selected.created_at).toLocaleString()}</p>
+                <p className="text-xs text-neutral-400">{formatDateTime(selected.created_at)}</p>
               </div>
               <button onClick={()=>setSelected(null)} className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-xl"><X size={18}/></button>
             </div>

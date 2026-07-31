@@ -10,8 +10,8 @@ const TIER_COLOR: Record<string,string> = {
 };
 
 export default function AdminCrmPage() {
-  const [data,      setData]      = useState<{vipCustomers:Customer[];newCustomers:Customer[];atRisk:Customer[];totalSubs:number;newsletter:Array<{email:string;created_at:string}>}|null>(null);
-  const [tab,       setTab]       = useState<"segments"|"newsletter">("segments");
+  const [data,      setData]      = useState<{vipCustomers:Customer[];newCustomers:Customer[];atRisk:Customer[];totalSubs:number;newsletter:Array<{email:string;created_at:string}>;messages?:Array<{id:number;name:string;email:string;message:string;status:string;created_at:string}>}|null>(null);
+  const [tab,       setTab]       = useState<"segments"|"newsletter"|"inquiries">("segments");
   const [activeSegment, setSegment] = useState("vip");
   const [composeOpen, setComposeOpen] = useState(false);
   const [emailForm, setEmailForm] = useState({ subject:"", heading:"", body:"", ctaLabel:"", ctaUrl:"" });
@@ -161,10 +161,10 @@ export default function AdminCrmPage() {
 
       {/* Tabs */}
       <div className="flex gap-3">
-        {(["segments","newsletter"] as const).map(t => (
+        {(["segments","newsletter","inquiries"] as const).map(t => (
           <button key={t} onClick={()=>setTab(t)}
             className={`px-4 py-2 rounded-full text-xs font-semibold capitalize transition-colors ${tab===t?"bg-[#e02020] text-white":"bg-white dark:bg-neutral-900 text-neutral-500 border border-neutral-200 dark:border-neutral-700 hover:text-[#e02020]"}`}>
-            {t==="segments"?"Customer Segments":"Newsletter List"}
+            {t==="segments"?"Customer Segments":t==="newsletter"?"Newsletter List":"Inquiries"}
           </button>
         ))}
       </div>
@@ -249,6 +249,53 @@ export default function AdminCrmPage() {
                 ))}
               </tbody>
             </table>
+          )}
+        </div>
+      )}
+
+      {tab === "inquiries" && (
+        <div className="bg-white dark:bg-neutral-900 rounded-2xl overflow-hidden">
+          <div className="flex items-center justify-between p-5 border-b border-neutral-100 dark:border-neutral-800">
+            <h3 className="font-semibold text-neutral-900 dark:text-white text-sm">Customer Inquiries ({data?.messages?.length??0})</h3>
+            <button className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border border-neutral-200 dark:border-neutral-700 rounded-xl hover:border-[#e02020] transition-colors">
+              <Download size={12}/> Export CSV
+            </button>
+          </div>
+          {(data?.messages?.length ?? 0) === 0 ? (
+            <div className="py-16 text-center">
+              <Mail size={36} className="mx-auto text-neutral-200 mb-3"/>
+              <p className="text-neutral-400 text-sm">No messages yet</p>
+              <p className="text-neutral-300 text-xs mt-1">Inquiries from the contact form will appear here</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-neutral-100 dark:divide-neutral-800">
+              {data?.messages?.map((m) => (
+                <div key={m.id} className="p-5 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center text-neutral-900 dark:text-white text-sm font-bold flex-shrink-0">
+                        {m.name[0]?.toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-neutral-900 dark:text-white">{m.name}</p>
+                        <p className="text-xs text-neutral-500">{m.email}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${m.status === 'unread' ? 'bg-blue-100 text-blue-700' : 'bg-neutral-100 text-neutral-500'}`}>
+                        {m.status.toUpperCase()}
+                      </span>
+                      <p className="text-[10px] text-neutral-400 mt-1">{new Date(m.created_at).toLocaleString()}</p>
+                    </div>
+                  </div>
+                  <div className="pl-13 ml-13 mt-2">
+                    <p className="text-sm text-neutral-600 dark:text-neutral-300 whitespace-pre-line bg-white dark:bg-neutral-950 p-4 rounded-xl border border-neutral-100 dark:border-neutral-800">
+                      {m.message}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       )}

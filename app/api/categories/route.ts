@@ -42,8 +42,8 @@ export async function POST(req: NextRequest) {
       .replace(/[^a-z0-9-]/g, "");
 
     await db.execute({
-      sql: `INSERT INTO categories (id, name, slug, parent_id, image_url, description, display_order)
-            VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      sql: `INSERT INTO categories (id, name, slug, parent_id, image_url, description, display_order, is_active)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       args: [
         id,
         body.name,
@@ -51,7 +51,8 @@ export async function POST(req: NextRequest) {
         body.parent_id || null,
         body.image_url || null,
         body.description || null,
-        body.display_order || 0
+        body.display_order || 0,
+        body.is_active !== undefined ? (body.is_active ? 1 : 0) : 1
       ]
     });
 

@@ -137,7 +137,7 @@ export default function ProductCard({ product }: { product: Product }) {
                 cart.push({ productId: product.id, name: product.name, qty: 1, price: product.price, image: product.image });
                 const res = await fetch("/api/cart", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items: cart }) });
                 if (res.ok) {
-                  toast.success("Added to bag", { description: `${product.name} — £${product.price.toFixed(2)}` });
+                  toast.success("Added to bag", { description: `${product.name} — ${formatPrice(product.price)}` });
                 } else if (res.status === 401) {
                   toast.error("Please sign in", { description: "Log in to add items to your bag." });
                 }

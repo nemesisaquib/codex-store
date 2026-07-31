@@ -64,7 +64,7 @@ export default function AdminDashboard() {
               </span>
             )}
           </h1>
-          <p className="text-neutral-500 text-sm mt-0.5">{new Date().toLocaleDateString("en-GB",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}</p>
+          <p className="text-neutral-500 text-sm mt-0.5">{new Date().toLocaleDateString(undefined,{weekday:"long",year:"numeric",month:"long",day:"numeric"})}</p>
         </div>
         <button onClick={() => load()} className="flex items-center gap-2 px-4 py-2 border border-neutral-200 dark:border-neutral-700 rounded-xl text-sm hover:border-[#e02020] transition-colors">
           <RefreshCw size={13} className={loading?"animate-spin":""}/> Refresh

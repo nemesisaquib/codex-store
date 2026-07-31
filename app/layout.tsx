@@ -55,12 +55,12 @@ export async function generateMetadata(): Promise<Metadata> {
       robots: s.seo_robots || "index, follow",
       icons: {
         icon: [
-          { url: "/favicon/favicon.ico", sizes: "any" },
+          { url: favicon, sizes: "any" },
           { url: "/favicon/favicon-96x96.png", sizes: "96x96", type: "image/png" },
           { url: "/favicon/favicon.svg", type: "image/svg+xml" },
         ],
-        shortcut: "/favicon/favicon.ico",
-        apple: [{ url: "/favicon/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+        shortcut: favicon,
+        apple: [{ url: apple, sizes: "180x180", type: "image/png" }],
       },
       manifest: "/favicon/site.webmanifest",
       openGraph: { type: "website", siteName: name, title, description: desc, images: [{ url: ogImg }] },

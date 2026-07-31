@@ -158,34 +158,17 @@ const CATEGORY_IMAGE_SETS: Record<string, string[]> = {
 
 export function getProductGallery(p?: any): string[] {
   if (!p) return [];
-  const id = p.id || "";
-  const name = p.name || "";
   const existing: string[] = safeJsonArray(p.gallery);
-  const rawList = [p.image_url || p.image, p.image_url2 || p.image2, ...existing].filter(Boolean) as string[];
   
-  if (rawList.length >= 6) {
+  // Combine all possible images, filtering out duplicates and falsy values
+  const rawList = Array.from(new Set([p.image_url || p.image, p.image_url2 || p.image2, ...existing])).filter(Boolean) as string[];
+  
+  if (rawList.length > 0) {
     return rawList;
   }
 
-  const catLower = (p.category || "").toLowerCase();
-  let pool = CATEGORY_IMAGE_SETS.women;
-  if (catLower.includes("men") && !catLower.includes("women")) pool = CATEGORY_IMAGE_SETS.men;
-  else if (catLower.includes("shoe") || catLower.includes("footwear") || catLower.includes("sneaker")) pool = CATEGORY_IMAGE_SETS.shoes;
-  else if (catLower.includes("access") || catLower.includes("watch") || catLower.includes("bag") || catLower.includes("jewel")) pool = CATEGORY_IMAGE_SETS.accessories;
-  else if (catLower.includes("kid") || catLower.includes("child") || catLower.includes("baby")) pool = CATEGORY_IMAGE_SETS.kids;
-
-  const result = [...rawList];
-  const charSum = (id + name).split("").reduce((s, c) => s + c.charCodeAt(0), 0);
-
-  for (let i = 0; i < 8; i++) {
-    if (result.length >= 6) break;
-    const img = pool[(charSum + i * 3) % pool.length];
-    if (!result.includes(img)) {
-      result.push(img);
-    }
-  }
-
-  return result.length > 0 ? result : [pool[0]];
+  // Absolute fallback if a product somehow has zero images in the database
+  return ["https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=1200&q=85&auto=format&fit=crop"];
 }
 
 const getBaseUrl = () => {

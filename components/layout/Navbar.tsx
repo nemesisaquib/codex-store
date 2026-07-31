@@ -261,6 +261,7 @@ export default function Navbar() {
   const [searchVal, setSearchVal] = useState("");
   const [cartOpen, setCartOpen]   = useState(false);
   const [cartCount, setCartCount] = useState(0);
+  const [activeCategories, setActiveCategories] = useState<string[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleMouseEnter = (label: string) => {
@@ -279,6 +280,21 @@ export default function Navbar() {
     const fn = () => setScrolled(window.scrollY > 32);
     fn();
     window.addEventListener("scroll", fn, { passive: true });
+    
+    // Fetch active categories
+    fetch("/api/categories")
+      .then(res => res.json())
+      .then(data => {
+        if (data.categories) {
+          // Filter categories that have is_active == 0 (hidden)
+          const activeSlugs = data.categories
+            .filter((c: any) => c.is_active !== 0)
+            .map((c: any) => c.name.toLowerCase());
+          setActiveCategories(activeSlugs);
+        }
+      })
+      .catch(() => {});
+
     return () => window.removeEventListener("scroll", fn);
   }, []);
 
@@ -352,30 +368,37 @@ export default function Navbar() {
 
             {/* ── Desktop nav ── */}
             <nav className="hidden lg:flex items-center gap-1 flex-1 h-full">
-              {NAV_LINKS.map((link) => (
-                <div
-                  key={link.label}
-                  className="h-full flex items-center static"
-                  onMouseEnter={() => handleMouseEnter(link.label)}
-                  onMouseLeave={handleMouseLeave}
-                >
-                  <Link
-                    href={link.href}
-                    className="relative flex items-center gap-1.5 px-4 h-full text-[13px] font-bold tracking-wider uppercase transition-all duration-200 group"
-                    style={{ color: link.sale ? "#e02020" : "#0a0a0a" }}
+              {NAV_LINKS.map((link) => {
+                // If it's a category link and we have fetched categories, hide it if not in activeCategories
+                const linkNameLower = link.label.toLowerCase();
+                const isCatLink = ["women", "men", "kids", "categories", "groceries"].includes(linkNameLower);
+                if (isCatLink && activeCategories.length > 0 && !activeCategories.includes(linkNameLower)) return null;
+
+                return (
+                  <div
+                    key={link.label}
+                    className="h-full flex items-center static"
+                    onMouseEnter={() => handleMouseEnter(link.label)}
+                    onMouseLeave={handleMouseLeave}
                   >
-                    <span className="relative">
-                      {link.label}
-                      <span className={`absolute left-0 bottom-3 h-[2px] bg-[#e02020] transition-all duration-300 ${dropdown === link.label ? "w-full" : "w-0 group-hover:w-full"}`}/>
-                    </span>
-                    {link.sale && (
-                      <span className="badge-sale bg-[#e02020] text-white text-[8px] font-black px-1.5 py-0.5 rounded-sm tracking-widest uppercase animate-pulse">
-                        SALE
+                    <Link
+                      href={link.href}
+                      className="relative flex items-center gap-1.5 px-4 h-full text-[13px] font-bold tracking-wider uppercase transition-all duration-200 group"
+                      style={{ color: link.sale ? "#e02020" : "#0a0a0a" }}
+                    >
+                      <span className="relative">
+                        {link.label}
+                        <span className={`absolute left-0 bottom-3 h-[2px] bg-[#e02020] transition-all duration-300 ${dropdown === link.label ? "w-full" : "w-0 group-hover:w-full"}`}/>
                       </span>
-                    )}
-                  </Link>
-                </div>
-              ))}
+                      {link.sale && (
+                        <span className="badge-sale bg-[#e02020] text-white text-[8px] font-black px-1.5 py-0.5 rounded-sm tracking-widest uppercase animate-pulse">
+                          SALE
+                        </span>
+                      )}
+                    </Link>
+                  </div>
+                );
+              })}
             </nav>
 
             {/* ── Full Width Mega Menu Dropdown ── */}
@@ -641,19 +664,25 @@ export default function Navbar() {
 
             {/* Links */}
             <nav className="flex-1 overflow-y-auto p-4 space-y-1">
-              {NAV_LINKS.map((link) => (
-                <Link
-                  key={link.label}
-                  href={link.href}
-                  onClick={() => setMobile(false)}
-                  className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                    link.sale ? "text-[#e02020] bg-[#e02020]/5" : "text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-900"
-                  }`}
-                >
-                  {link.label}
-                  {link.sale && <span className="badge-sale text-[9px] font-black bg-[#e02020] text-white px-2 py-0.5 rounded-sm">SALE</span>}
-                </Link>
-              ))}
+              {NAV_LINKS.map((link) => {
+                const linkNameLower = link.label.toLowerCase();
+                const isCatLink = ["women", "men", "kids", "categories", "groceries"].includes(linkNameLower);
+                if (isCatLink && activeCategories.length > 0 && !activeCategories.includes(linkNameLower)) return null;
+
+                return (
+                  <Link
+                    key={link.label}
+                    href={link.href}
+                    onClick={() => setMobile(false)}
+                    className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+                      link.sale ? "text-[#e02020] bg-[#e02020]/5" : "text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-900"
+                    }`}
+                  >
+                    {link.label}
+                    {link.sale && <span className="badge-sale text-[9px] font-black bg-[#e02020] text-white px-2 py-0.5 rounded-sm">SALE</span>}
+                  </Link>
+                );
+              })}
 
               <div className="pt-4 border-t border-neutral-100 dark:border-neutral-800 mt-4 space-y-1">
                 {[

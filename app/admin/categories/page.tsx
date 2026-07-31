@@ -12,6 +12,7 @@ interface Category {
   image_url: string | null;
   description: string | null;
   display_order: number;
+  is_active: number;
 }
 
 export default function AdminCategoriesPage() {
@@ -216,6 +217,29 @@ export default function AdminCategoriesPage() {
                   </div>
 
                   <div className="flex items-center gap-2">
+                    <button
+                      onClick={async () => {
+                        try {
+                          const newStatus = parent.is_active ? 0 : 1;
+                          await fetch(`/api/categories/${parent.id}`, {
+                            method: "PATCH",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ is_active: newStatus })
+                          });
+                          toast.success(`Category ${newStatus ? 'enabled' : 'disabled'}`);
+                          load();
+                        } catch {
+                          toast.error("Failed to update status");
+                        }
+                      }}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+                        parent.is_active
+                          ? "bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-500/20 dark:text-green-400"
+                          : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-400"
+                      }`}
+                    >
+                      {parent.is_active ? "Active" : "Hidden"}
+                    </button>
                     <button
                       onClick={() => openAddSub(parent.id)}
                       className="px-3 py-1.5 bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-200 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors"

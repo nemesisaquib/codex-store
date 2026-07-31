@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { safeJsonArray, getProductGallery } from "@/lib/api";
 import { getOptimizedImageUrl } from "@/lib/imageUtils";
+import { useSettings } from "@/lib/SettingsContext";
 
 interface Product {
   id: string; slug: string; name: string; brand: string;
@@ -58,6 +59,8 @@ const QuickView = memo(({ product, open, onClose }: QuickViewProps) => {
     } catch (e) { toast.error("Something went wrong"); }
     setAdding(false);
   }, [product, qty, onClose]);
+
+  const { formatPrice } = useSettings();
 
   if (!open || !mounted) return null;
 
@@ -155,9 +158,9 @@ const QuickView = memo(({ product, open, onClose }: QuickViewProps) => {
 
             {/* Price row */}
             <div className="flex items-baseline gap-3">
-              <span className="text-3xl font-black text-neutral-900 dark:text-white">${product.price.toFixed(0)}</span>
+              <span className="text-3xl font-black text-neutral-900 dark:text-white">{formatPrice(product.price)}</span>
               {product.compare_price && (
-                <span className="text-base text-neutral-400 line-through">${product.compare_price}</span>
+                <span className="text-base text-neutral-400 line-through">{formatPrice(product.compare_price)}</span>
               )}
               {discount > 0 && (
                 <span className="text-xs font-bold text-[#e02020] bg-[#e02020]/10 px-2 py-0.5 rounded-md">−{discount}%</span>
@@ -238,7 +241,7 @@ const QuickView = memo(({ product, open, onClose }: QuickViewProps) => {
               }`}
             >
               <ShoppingBag size={16}/>
-              {adding ? "Adding to bag…" : `Add to Bag — $${(product.price * qty).toFixed(0)}`}
+              {adding ? "Adding to bag…" : `Add to Bag — ${formatPrice(product.price * qty)}`}
             </button>
 
             <div className="flex gap-2">

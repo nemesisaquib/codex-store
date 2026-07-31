@@ -30,7 +30,7 @@ export default function CategoryStrip() {
     "https://images.unsplash.com/photo-1523293182086-7651a899d37f?auto=format&fit=crop&q=80&w=800&h=1000"
   ];
 
-  const displayList = categories.length > 0 ? categories.slice(0, 4) : [];
+  const displayList = categories.filter((c: any) => c.is_active !== 0).slice(0, 4);
 
   return (
     <section className="max-w-[1440px] mx-auto px-6 lg:px-10 py-20">
