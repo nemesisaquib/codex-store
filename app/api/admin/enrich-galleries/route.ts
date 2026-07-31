@@ -28,7 +28,7 @@ export async function GET() {
       for(let j = 1; j <= 5; j++) {
          // Using the product's ID character sum to ensure different products get different locks
          const lock = (p.id.charCodeAt(0) || 1) + j;
-         images.push(\`https://loremflickr.com/800/1000/\${strictType},product?lock=\${lock}\`);
+         images.push(`https://loremflickr.com/800/1000/${strictType},product?lock=${lock}`);
       }
       
       const img1 = images[0];
@@ -43,7 +43,7 @@ export async function GET() {
       updatedCount++;
     }
 
-    return NextResponse.json({ ok: true, message: \`Successfully enriched \${updatedCount} products with accurate images from LoremFlickr.\` });
+    return NextResponse.json({ ok: true, message: `Successfully enriched ${updatedCount} products with accurate images from LoremFlickr.` });
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 });
   }

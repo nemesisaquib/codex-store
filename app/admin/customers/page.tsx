@@ -46,6 +46,21 @@ export default function AdminCustomersPage() {
     load();
   };
 
+  const exportCSV = () => {
+    const headers = ["ID", "First Name", "Last Name", "Email", "Phone", "Tier", "Status", "Loyalty Points", "Country", "Total Orders", "Total Spend", "Created At"];
+    const rows = customers.map(c => [
+      c.id, c.first_name, c.last_name, c.email, c.phone || "", c.tier, c.status, c.loyalty_pts, c.country || "", c.total_orders, c.total_spend, new Date(c.created_at).toISOString()
+    ]);
+    const csvContent = [headers.join(","), ...rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(","))].join("\\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `customers_export_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -57,7 +72,7 @@ export default function AdminCustomersPage() {
           <button onClick={load} disabled={loading} className="p-2.5 bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-neutral-600 dark:text-neutral-300 rounded-xl transition-colors" title="Refresh Customers">
             <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
           </button>
-          <button className="flex items-center gap-2 px-4 py-2.5 border border-neutral-200 dark:border-neutral-700 rounded-xl text-sm font-medium hover:border-[#e02020] transition-colors">
+          <button onClick={exportCSV} className="flex items-center gap-2 px-4 py-2.5 border border-neutral-200 dark:border-neutral-700 rounded-xl text-sm font-medium hover:border-[#e02020] transition-colors">
             <Download size={14}/> Export CSV
           </button>
         </div>

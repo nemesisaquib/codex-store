@@ -159,7 +159,16 @@ function ImageField({ fieldKey, val, changed, onChange }: {
         {/* Preview thumbnail */}
         {val ? (
           <div className="relative flex-shrink-0 w-12 h-12 rounded-xl border-2 border-neutral-200 dark:border-neutral-700 overflow-hidden bg-neutral-50 dark:bg-neutral-800 group shadow-sm">
-            <img src={val} alt="" className="w-full h-full object-contain p-1" onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = "0.2"; }} />
+            <img
+              src={val}
+              alt=""
+              className="w-full h-full object-contain p-1"
+              onError={e => {
+                const target = e.currentTarget as HTMLImageElement;
+                target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ef4444' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='18' height='18' x='3' y='3' rx='2' ry='2'/%3E%3Ccircle cx='9' cy='9' r='2'/%3E%3Cpath d='m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21'/%3E%3Cline x1='3' y1='3' x2='21' y2='21'/%3E%3C/svg%3E";
+                target.className = "w-full h-full object-contain p-3 opacity-60";
+              }}
+            />
             <button
               type="button"
               onClick={() => onChange("")}
@@ -197,8 +206,33 @@ export default function AdminSettingsPage() {
 
   const load = () =>
     fetch("/api/settings").then(r => r.json()).then(d => {
+      const f = d.flat ?? {};
+      let needsFix = false;
+      const fixes: Record<string, string> = {};
+      
+      // Auto-correct legacy incorrect paths for favicons
+      if (f.store_favicon && f.store_favicon.includes("/Logo/favicon")) {
+        f.store_favicon = f.store_favicon.replace("/Logo/favicon", "/favicon");
+        fixes.store_favicon = f.store_favicon;
+        needsFix = true;
+      }
+      if (f.store_favicon_apple && f.store_favicon_apple.includes("/Logo/favicon")) {
+        f.store_favicon_apple = f.store_favicon_apple.replace("/Logo/favicon", "/favicon");
+        fixes.store_favicon_apple = f.store_favicon_apple;
+        needsFix = true;
+      }
+      
       setSettings(d.settings ?? {});
-      setFlat(d.flat ?? {});
+      setFlat(f);
+
+      // Permanently fix in DB immediately
+      if (needsFix) {
+        fetch("/api/settings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(fixes)
+        });
+      }
     });
 
   useEffect(() => { load(); }, []);

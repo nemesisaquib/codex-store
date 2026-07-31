@@ -26,20 +26,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   try {
     // 1. Get all products
-    const productsRes = await db.execute("SELECT slug, updated_at FROM products WHERE is_active = 1");
-    const products = productsRes.rows as { slug: string, updated_at: string }[];
+    const productsRes = await db.execute("SELECT slug, created_at FROM products WHERE status = 'active'");
+    const products = productsRes.rows as { slug: string, created_at: string }[];
     
     products.forEach(p => {
       routes.push({
         url: `${baseUrl}/product/${p.slug}`,
-        lastModified: new Date(p.updated_at || Date.now()),
+        lastModified: new Date(p.created_at || Date.now()),
         changeFrequency: "weekly",
         priority: 0.8,
       });
     });
 
     // 2. Get categories
-    const catRes = await db.execute("SELECT DISTINCT category FROM products WHERE is_active = 1");
+    const catRes = await db.execute("SELECT DISTINCT category FROM products WHERE status = 'active'");
     const categories = catRes.rows as { category: string }[];
     
     categories.forEach(c => {

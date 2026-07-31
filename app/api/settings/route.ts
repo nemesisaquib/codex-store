@@ -12,8 +12,8 @@ const DEFAULT_SETTINGS = [
   { key: "store_address",       value: "123 Fashion Ave, New York, NY 10001",  group_name: "general" },
   { key: "currency",            value: "USD",                                  group_name: "general" },
   { key: "store_logo",          value: "/Logo/Eshop.png",                      group_name: "general" },
-  { key: "store_favicon",       value: "/Logo/favicon/favicon.ico",            group_name: "general" },
-  { key: "store_favicon_apple", value: "/Logo/favicon/apple-touch-icon.png",   group_name: "general" },
+  { key: "store_favicon",       value: "/favicon/favicon.ico",            group_name: "general" },
+  { key: "store_favicon_apple", value: "/favicon/apple-touch-icon.png",   group_name: "general" },
   // Shipping
   { key: "free_shipping_threshold",  value: "150",  group_name: "shipping" },
   { key: "express_shipping_price",   value: "12.99",group_name: "shipping" },
@@ -49,6 +49,9 @@ function deriveGroup(key: string): string {
 export async function GET() {
   try {
     const db = getDb();
+
+    // Auto-fix legacy paths for favicons directly in the database
+    await db.execute("UPDATE settings SET value = REPLACE(value, '/Logo/favicon', '/favicon') WHERE key IN ('store_favicon', 'store_favicon_apple') AND value LIKE '%/Logo/favicon%'");
 
     // Seed missing defaults on every startup (INSERT OR IGNORE = safe)
     for (const item of DEFAULT_SETTINGS) {
