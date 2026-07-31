@@ -27,7 +27,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     // 1. Get all products
     const productsRes = await db.execute("SELECT slug, created_at FROM products WHERE status = 'active'");
-    const products = productsRes.rows as { slug: string, created_at: string }[];
+    const products = productsRes.rows as unknown as { slug: string; created_at: string }[];
     
     products.forEach(p => {
       routes.push({
@@ -40,7 +40,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // 2. Get categories
     const catRes = await db.execute("SELECT DISTINCT category FROM products WHERE status = 'active'");
-    const categories = catRes.rows as { category: string }[];
+    const categories = catRes.rows as unknown as { category: string }[];
     
     categories.forEach(c => {
       if (c.category) {
@@ -54,20 +54,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
 
     // 3. Get static pages from SEO settings
-    const pagesRes = await db.execute("SELECT page FROM seo_pages");
-    const pages = pagesRes.rows as { page: string }[];
-    
-    pages.forEach(p => {
-      // Don't add root again
-      if (p.page !== "/") {
-        routes.push({
-          url: `${baseUrl}${p.page}`,
-          lastModified: new Date(),
-          changeFrequency: "monthly",
-          priority: 0.5,
-        });
-      }
-    });
+    try {
+      const pagesRes = await db.execute("SELECT page FROM seo_pages");
+      const pages = pagesRes.rows as unknown as { page: string }[];
+      
+      pages.forEach(p => {
+        // Don't add root again
+        if (p.page !== "/") {
+          routes.push({
+            url: `${baseUrl}${p.page}`,
+            lastModified: new Date(),
+            changeFrequency: "monthly",
+            priority: 0.5,
+          });
+        }
+      });
+    } catch {}
 
   } catch (error) {
     console.error("Failed to generate sitemap:", error);
