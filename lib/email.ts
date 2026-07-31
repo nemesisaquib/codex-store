@@ -37,7 +37,6 @@ export async function getOrTestTransport(forceTest = false) {
   let cfg = await getSmtpConfig();
 
   if (!cfg || forceTest || cfg.host === "ethereal" || cfg.host === "test") {
-    // Generate a free Ethereal test SMTP account automatically
     const testAccount = await nodemailer.createTestAccount();
     cfg = {
       host: "smtp.ethereal.email",
@@ -151,6 +150,7 @@ export function orderBookingTemplate(order: {
   total: number;
   items: Array<{ name: string; quantity: number; price: number }>;
   shippingAddress?: string;
+  temporaryPassword?: string;
 }) {
   const itemListHtml = (order.items || [])
     .map(
@@ -172,6 +172,23 @@ export function orderBookingTemplate(order: {
       <div style="font-size:18px;font-weight:800;color:#e02020;">#${order.orderNumber}</div>
     </div>
 
+    ${
+      order.temporaryPassword
+        ? `<div style="background-color:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:20px;margin:24px 0;">
+            <div style="font-size:13px;font-weight:700;color:#1e40af;margin-bottom:6px;">🔑 Your Account Credentials & Track Order Access</div>
+            <div style="font-size:13px;color:#1e3a8a;line-height:1.5;">
+              An account was created for your guest order so you can track your parcel in real-time.
+            </div>
+            <div style="margin-top:12px;padding:12px;background-color:#ffffff;border-radius:8px;font-family:monospace;font-size:14px;color:#09090b;border:1px solid #dbeafe;">
+              Temporary Password: <strong style="color:#e02020;">${order.temporaryPassword}</strong>
+            </div>
+            <div style="margin-top:12px;">
+              <a href="${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/auth/login" target="_blank" style="font-size:13px;font-weight:700;color:#1d4ed8;text-decoration:underline;">Click here to Sign In or Change Password</a>
+            </div>
+          </div>`
+        : ""
+    }
+
     <h3 style="font-size:15px;font-weight:700;color:#09090b;margin:24px 0 12px 0;">Order Summary</h3>
     <table width="100%" cellpadding="0" cellspacing="0">
       ${itemListHtml}
@@ -188,8 +205,7 @@ export function orderBookingTemplate(order: {
             <div style="font-size:14px;color:#3f3f46;line-height:1.5;">${order.shippingAddress}</div>
           </div>`
         : ""
-    }
-  `;
+    }`;
 
   return emailTemplate(`Order Confirmed! #${order.orderNumber}`, body, {
     label: "Track Your Order",
@@ -206,86 +222,54 @@ export function orderCancellationTemplate(order: {
 }) {
   const body = `
     <p>Hi <strong>${order.customerName}</strong>,</p>
-    <p>Your order <strong>#${order.orderNumber}</strong> has been cancelled as requested.</p>
-    
-    <div style="background-color:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:20px;margin:24px 0;color:#991b1b;">
-      <div style="font-size:14px;font-weight:700;margin-bottom:4px;">Cancellation Details</div>
-      <div style="font-size:13px;line-height:1.5;">${order.reason || "The order was cancelled by request."}</div>
-      ${
-        order.refundAmount
-          ? `<div style="margin-top:12px;font-size:14px;font-weight:800;color:#991b1b;">Refund Amount: €${order.refundAmount.toFixed(2)} (Processing via original payment method)</div>`
-          : ""
-      }
-    </div>
-
-    <p style="font-size:14px;color:#52525b;">If you believe this was done in error or need assistance, please feel free to reply directly to this email or visit our store.</p>
+    <p>Your order <strong>#${order.orderNumber}</strong> has been cancelled.</p>
+    ${order.reason ? `<p><strong>Reason:</strong> ${order.reason}</p>` : ""}
+    ${order.refundAmount ? `<p>A refund of <strong>€${order.refundAmount.toFixed(2)}</strong> has been initiated.</p>` : ""}
   `;
-
-  return emailTemplate(`Order Cancelled: #${order.orderNumber}`, body, {
-    label: "Visit Store",
-    url: "http://localhost:3000",
-  });
+  return emailTemplate(`Order Cancelled #${order.orderNumber}`, body);
 }
 
-/** 3. Order Delivery / Shipping Template */
+/** 3. Order Delivery Confirmation Template */
 export function orderDeliveryTemplate(order: {
   orderNumber: string;
   customerName: string;
-  status: "shipped" | "delivered";
   trackingNumber?: string;
   carrier?: string;
 }) {
-  const isDelivered = order.status === "delivered";
-  const title = isDelivered ? `Order Delivered! #${order.orderNumber}` : `Your Order is On Its Way! #${order.orderNumber}`;
-
   const body = `
     <p>Hi <strong>${order.customerName}</strong>,</p>
-    <p>${
-      isDelivered
-        ? `Great news! Your package for order <strong>#${order.orderNumber}</strong> has been successfully delivered.`
-        : `Exciting news! Your order <strong>#${order.orderNumber}</strong> has been dispatched and is on its way to your delivery address.`
-    }</p>
-    
-    <div style="background-color:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:20px;margin:24px 0;color:#166534;">
-      <div style="font-size:12px;text-transform:uppercase;font-weight:700;letter-spacing:1px;margin-bottom:4px;">Shipment Status</div>
-      <div style="font-size:18px;font-weight:800;">${isDelivered ? "DELIVERED 📦" : "IN TRANSIT 🚚"}</div>
-      ${order.trackingNumber ? `<div style="margin-top:8px;font-size:13px;">Tracking Number: <strong>${order.trackingNumber}</strong> (${order.carrier || "Express Delivery"})</div>` : ""}
-    </div>
-
-    <p style="font-size:14px;color:#52525b;">Thank you for shopping with E-shop!</p>
+    <p>Great news! Your order <strong>#${order.orderNumber}</strong> has been shipped and is on its way to you.</p>
+    ${
+      order.trackingNumber
+        ? `<div style="background-color:#f4f4f5;border-radius:12px;padding:20px;margin:24px 0;">
+            <div style="font-size:12px;color:#71717a;text-transform:uppercase;font-weight:700;letter-spacing:1px;margin-bottom:4px;">Tracking Code (${order.carrier || "Standard Carrier"})</div>
+            <div style="font-size:16px;font-weight:800;color:#09090b;font-family:monospace;">${order.trackingNumber}</div>
+          </div>`
+        : ""
+    }
   `;
-
-  return emailTemplate(title, body, {
-    label: "Track Shipment",
-    url: `http://localhost:3000/track?order=${order.orderNumber}`,
+  return emailTemplate(`Order Shipped — #${order.orderNumber}`, body, {
+    label: "Track Package",
+    url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/track?order=${order.orderNumber}`,
   });
 }
 
-/** 4. Contact Form Template */
-export function contactFormTemplate(contact: {
+/** 4. Contact Form Customer Notification Template */
+export function contactFormTemplate(data: {
   name: string;
   email: string;
   subject?: string;
   message: string;
 }) {
   const body = `
-    <p>You have received a new contact inquiry from the E-shop storefront:</p>
-
+    <p>Hi <strong>${data.name}</strong>,</p>
+    <p>Thank you for reaching out to us! We've received your message and our support team will respond within 24 hours.</p>
+    
     <div style="background-color:#f4f4f5;border-radius:12px;padding:20px;margin:24px 0;">
-      <div style="margin-bottom:12px;">
-        <span style="font-size:12px;color:#71717a;text-transform:uppercase;font-weight:700;">Sender Name:</span>
-        <div style="font-size:15px;font-weight:700;color:#09090b;">${contact.name}</div>
-      </div>
-      <div style="margin-bottom:12px;">
-        <span style="font-size:12px;color:#71717a;text-transform:uppercase;font-weight:700;">Email Address:</span>
-        <div style="font-size:15px;font-weight:700;color:#e02020;"><a href="mailto:${contact.email}" style="color:#e02020;">${contact.email}</a></div>
-      </div>
-      <div>
-        <span style="font-size:12px;color:#71717a;text-transform:uppercase;font-weight:700;">Message Content:</span>
-        <div style="font-size:14px;color:#27272a;margin-top:4px;white-space:pre-line;line-height:1.5;">${contact.message}</div>
-      </div>
+      <div style="font-size:12px;color:#71717a;text-transform:uppercase;font-weight:700;letter-spacing:1px;margin-bottom:6px;">Your Inquiry Summary</div>
+      ${data.subject ? `<p style="margin:0 0 8px 0;font-[600];color:#09090b;"><strong>Subject:</strong> ${data.subject}</p>` : ""}
+      <p style="margin:0;font-size:14px;color:#3f3f46;white-space:pre-wrap;">${data.message}</p>
     </div>
   `;
-
-  return emailTemplate(`New Contact Message: ${contact.subject || "Store Inquiry"}`, body);
+  return emailTemplate(`We received your message, ${data.name}`, body);
 }

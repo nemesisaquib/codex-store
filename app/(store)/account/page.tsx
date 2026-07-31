@@ -22,7 +22,11 @@ export default function AccountDashboard() {
       setName(d.customer.first_name);
       fetch(`/api/orders?email=${d.customer.email}&limit=20`)
         .then(r=>r.json())
-        .then(o => { setOrders(o.orders ?? []); setLoading(false); });
+        .then(o => { setOrders(o.orders ?? []); setLoading(false); })
+        .catch(err => { console.error(err); setLoading(false); });
+    }).catch(err => {
+      console.error(err);
+      setLoading(false);
     });
   }, []);
 

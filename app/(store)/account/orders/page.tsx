@@ -21,7 +21,11 @@ export default function OrdersPage() {
       if (!d.customer) { setLoading(false); return; }
       fetch(`/api/orders?email=${d.customer.email}&limit=50`)
         .then(r=>r.json())
-        .then(o => { setOrders(o.orders ?? []); setLoading(false); });
+        .then(o => { setOrders(o.orders ?? []); setLoading(false); })
+        .catch(err => { console.error(err); setLoading(false); });
+    }).catch(err => {
+      console.error(err);
+      setLoading(false);
     });
   }, []);
 

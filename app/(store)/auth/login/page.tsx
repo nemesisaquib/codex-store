@@ -153,26 +153,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-neutral-200 dark:border-neutral-800" />
-            </div>
-            <div className="relative flex justify-center">
-              <span className="bg-white dark:bg-neutral-950 px-3 text-xs text-neutral-400">or continue with</span>
-            </div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            {["Google", "Apple"].map((p) => (
-              <button
-                key={p}
-                type="button"
-                className="flex items-center justify-center gap-2 py-3 border border-neutral-200 dark:border-neutral-700 rounded-xl text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 transition-colors"
-              >
-                {p}
-              </button>
-            ))}
-          </div>
         </div>
       </div>
     </div>

@@ -31,6 +31,10 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
           fetch("/api/customer/profile").then(r => r.json()).then(p => {
             setCustomer({ ...d.customer, ...(p.profile || {}) });
             setLoading(false);
+          }).catch(err => {
+            console.error(err);
+            setCustomer(d.customer);
+            setLoading(false);
           });
         }
       })
