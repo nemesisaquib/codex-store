@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ShieldCheck, Lock, Cpu, CheckCircle2 } from "lucide-react";
 
 const cols = [
   {
@@ -37,9 +38,45 @@ const cols = [
   },
 ];
 
-/* ── Inline SVG brand icons – no lucide text fallbacks ── */
+/* ── Inline SVG Payment Badges ── */
+const PaymentIcons = () => (
+  <div className="flex items-center gap-2 flex-wrap">
+    {/* Visa */}
+    <div className="px-2.5 py-1.5 bg-[#181a20] border border-neutral-800 rounded-lg flex items-center justify-center text-white" title="Visa">
+      <svg className="h-3.5 w-auto" viewBox="0 0 36 12" fill="currentColor">
+        <path d="M13.882 0L9.805 11.758H6.551L10.628 0h3.254zm10.741 7.795l1.715-4.632.99 4.632h-2.705zm3.766 3.963h3.019L28.795 0h-3.018c-.67 0-1.25.385-1.5 1.006L19.46 11.758h3.407s.557-1.528.683-1.874h4.156c.097.433.383 1.874.383 1.874zm-11.23-2.613c-.157-1.077-1.085-1.89-2.39-2.227l-1.393-.362c-.75-.192-1.077-.45-1.077-.833 0-.384.45-.672 1.258-.672.934 0 1.77.304 2.298.636l.542-2.457a8.775 8.775 0 00-3.08-.51c-3.14 0-5.344 1.637-5.36 3.966-.03 1.733 1.572 2.697 2.78 3.277 1.242.594 1.662.977 1.66 1.51-.005.819-.997 1.196-1.92 1.196-1.618 0-2.576-.46-3.327-.807l-.582 2.646c.729.33 2.074.614 3.468.629 3.326 0 5.485-1.61 5.513-4.104.01-1.378-.838-2.434-2.45-3.21zm-13.88.396L.452 1.006C.2.75 0 .614 0 .307A.307.307 0 01.307 0h5.163c.69 0 1.28.47 1.44 1.156l2.456 9.474H3.279z"/>
+      </svg>
+    </div>
+    {/* Mastercard */}
+    <div className="px-2.5 py-1.5 bg-[#181a20] border border-neutral-800 rounded-lg flex items-center justify-center" title="Mastercard">
+      <svg className="h-3.5 w-auto" viewBox="0 0 36 22" fill="none">
+        <circle cx="12" cy="11" r="10" fill="#EB001B"/>
+        <circle cx="24" cy="11" r="10" fill="#F79E1B" fillOpacity="0.9"/>
+        <path d="M18 3.464a9.96 9.96 0 013.742 7.536A9.96 9.96 0 0118 18.536 9.96 9.96 0 0114.258 11 9.96 9.96 0 0118 3.464z" fill="#FF5F00"/>
+      </svg>
+    </div>
+    {/* Apple Pay */}
+    <div className="px-2.5 py-1.5 bg-[#181a20] border border-neutral-800 rounded-lg flex items-center justify-center text-white font-bold text-[11px]" title="Apple Pay">
+      Pay
+    </div>
+    {/* Google Pay */}
+    <div className="px-2.5 py-1.5 bg-[#181a20] border border-neutral-800 rounded-lg flex items-center justify-center text-white font-bold text-[11px]" title="Google Pay">
+      <span className="text-blue-400">G</span><span className="text-[#e02020]">P</span><span className="text-yellow-400">a</span><span className="text-green-400">y</span>
+    </div>
+    {/* PayPal */}
+    <div className="px-2.5 py-1.5 bg-[#181a20] border border-neutral-800 rounded-lg flex items-center justify-center text-blue-400 font-bold text-[11px] italic" title="PayPal">
+      PayPal
+    </div>
+    {/* Klarna */}
+    <div className="px-2.5 py-1.5 bg-[#181a20] border border-neutral-800 rounded-lg flex items-center justify-center text-pink-400 font-bold text-[11px]" title="Klarna">
+      Klarna.
+    </div>
+  </div>
+);
+
+/* ── Inline SVG Social Icons ── */
 const SocialIcons = () => (
-  <div className="flex gap-3 mt-5">
+  <div className="flex gap-3 mt-4">
     {[
       {
         label: "Instagram",
@@ -82,7 +119,7 @@ const SocialIcons = () => (
         key={label}
         href={href}
         aria-label={label}
-        className="w-8 h-8 rounded-full border border-neutral-700 flex items-center justify-center text-neutral-400 hover:border-[#e02020] hover:text-[#e02020] transition-colors"
+        className="w-8 h-8 rounded-full border border-neutral-800 bg-[#14161c] flex items-center justify-center text-neutral-400 hover:border-[#e02020] hover:text-[#e02020] hover:bg-[#1a1d26] transition-all"
       >
         {svg}
       </a>
@@ -94,33 +131,65 @@ export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="bg-neutral-950 text-neutral-400">
+    <footer className="bg-[#0e0f12] text-neutral-400 border-t border-neutral-800/80">
+      {/* 🔒 Top Security & Trust Assurance Bar with Charcoal Shade */}
+      <div className="border-b border-neutral-800/60 bg-[#13151b]/80 py-8 px-6 lg:px-10">
+        <div className="max-w-[1440px] mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
+          {[
+            {
+              icon: Lock,
+              title: "256-Bit SSL Encrypted",
+              desc: "Bank-level TLS 1.3 encryption on every transaction",
+            },
+            {
+              icon: ShieldCheck,
+              title: "PCI-DSS Level 1 Security",
+              desc: "Verified compliant payment gateway processing",
+            },
+            {
+              icon: Cpu,
+              title: "Firewall Protected",
+              desc: "Database protected by anti-hoarding threat shields",
+            },
+            {
+              icon: CheckCircle2,
+              title: "100% Buyer Protection",
+              desc: "Guaranteed authentic products & 30-day money-back",
+            },
+          ].map((sec, i) => (
+            <div key={i} className="flex items-start gap-3.5">
+              <div className="w-9 h-9 rounded-xl bg-[#1c1e26] border border-neutral-700/50 text-[#e02020] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
+                <sec.icon size={18} />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-white tracking-wide">{sec.title}</h4>
+                <p className="text-[11px] text-neutral-400 mt-0.5 leading-snug">{sec.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Main footer grid */}
-      <div className="max-w-[1440px] mx-auto px-6 lg:px-10 py-16">
+      <div className="max-w-[1440px] mx-auto px-6 lg:px-10 py-14">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
           {/* Brand col */}
-          <div className="col-span-2 md:col-span-1">
-            <Link href="/" className="inline-block mb-4">
-              <div 
-                style={{ 
-                  width: "140px", 
-                  height: "40px", 
-                  backgroundColor: "#ffffff",
-                  maskImage: 'url("/Logo+ favicon/Eshop.png")',
-                  WebkitMaskImage: 'url("/Logo+ favicon/Eshop.png")',
-                  maskSize: 'contain',
-                  WebkitMaskSize: 'contain',
-                  maskRepeat: 'no-repeat',
-                  WebkitMaskRepeat: 'no-repeat',
-                  maskPosition: 'left center',
-                  WebkitMaskPosition: 'left center'
-                }} 
-                aria-label="E-shop Logo"
+          <div className="col-span-2 md:col-span-1 space-y-3.5">
+            <Link href="/" className="inline-block">
+              <img
+                src="/Logo/Eshop.png"
+                alt="E-shop Logo"
+                className="h-9 w-auto object-contain brightness-0 invert"
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  target.style.display = "none";
+                }}
               />
             </Link>
-            <p className="text-sm leading-relaxed">
+            <p className="text-sm leading-relaxed text-neutral-400">
               Premium global fashion for everyone. Wear the World.
             </p>
+
             <SocialIcons />
           </div>
 
@@ -132,7 +201,7 @@ export default function Footer() {
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-sm hover:text-white hover:translate-x-0.5 transition-all inline-block"
+                      className="text-sm text-neutral-400 hover:text-white hover:translate-x-0.5 transition-all inline-block"
                     >
                       {link.label}
                     </Link>
@@ -143,8 +212,17 @@ export default function Footer() {
           ))}
         </div>
 
+        {/* Payment Methods & Security Compliance Row */}
+        <div className="border-t border-neutral-800/60 mt-12 pt-8 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="space-y-1 text-center md:text-left">
+            <p className="text-xs font-bold text-neutral-200">Guaranteed Safe &amp; Secure Checkout</p>
+            <p className="text-[11px] text-neutral-400">256-Bit TLS Encryption · PCI-DSS Level 1 Compliant Gateway</p>
+          </div>
+          <PaymentIcons />
+        </div>
+
         {/* Bottom bar */}
-        <div className="border-t border-neutral-800 mt-14 pt-8 flex flex-col md:flex-row items-center justify-between gap-3 text-xs">
+        <div className="border-t border-neutral-800/80 mt-8 pt-8 flex flex-col md:flex-row items-center justify-between gap-3 text-xs bg-[#090a0d] -mx-6 lg:-mx-10 px-6 lg:px-10 -mb-14 pb-8">
           {/* Dynamic credit */}
           <p className="text-neutral-500">
             Design &amp; Development by{" "}
@@ -161,7 +239,7 @@ export default function Footer() {
             {" · E-shop"}
           </p>
 
-          <div className="flex gap-6">
+          <div className="flex gap-6 text-neutral-400">
             <Link href="/privacy"  className="hover:text-white transition-colors">Privacy Policy</Link>
             <Link href="/terms"    className="hover:text-white transition-colors">Terms &amp; Conditions</Link>
             <Link href="/cookies"  className="hover:text-white transition-colors">Cookie Policy</Link>

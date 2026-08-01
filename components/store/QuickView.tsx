@@ -53,8 +53,10 @@ const QuickView = memo(({ product, open, onClose }: QuickViewProps) => {
       const cart = await fetch("/api/cart").then(r => r.json()).then(d => d.items ?? []);
       cart.push({ productId: product.id, name: product.name, qty, price: product.price, image: product.image_url });
       const res = await fetch("/api/cart", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items: cart }) });
-      if (res.ok) toast.success("Added to bag", { description: `${product.name} · Qty ${qty}` });
-      else if (res.status === 401) toast.error("Please sign in", { description: "Log in to add items to your bag." });
+      if (res.ok) {
+        toast.success("Added to bag", { description: `${product.name} · Qty ${qty}` });
+        window.dispatchEvent(new Event("cart-updated"));
+      } else if (res.status === 401) toast.error("Please sign in", { description: "Log in to add items to your bag." });
       onClose();
     } catch (e) { toast.error("Something went wrong"); }
     setAdding(false);

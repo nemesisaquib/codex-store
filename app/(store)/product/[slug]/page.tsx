@@ -25,7 +25,20 @@ export default function ProductViewPage() {
   const [wishlisted, setWish]   = useState(false);
   const [expanded, setExpanded] = useState<string|null>("description");
   const [activeImg, setActiveImg] = useState(0);
-  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [revAvg, setRevAvg] = useState<number>(5.0);
+  const [revTotal, setRevTotal] = useState<number>(0);
+  const [revBreakdown, setRevBreakdown] = useState<Record<number, number>>({ 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 });
+  
+  // Write Review Modal state
+  const [showWriteModal, setShowWriteModal] = useState(false);
+  const [revRating, setRevRating] = useState(5);
+  const [revTitle, setRevTitle] = useState("");
+  const [revComment, setRevComment] = useState("");
+  const [revName, setRevName] = useState("");
+  const [revEmail, setRevEmail] = useState("");
+  const [submittingRev, setSubmittingRev] = useState(false);
+
   const [pinCode, setPinCode] = useState("");
   const [pinStatus, setPinStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [locationName, setLocationName] = useState("");
@@ -37,7 +50,14 @@ export default function ProductViewPage() {
         setProduct(p);
         setLoading(false);
         if (p?.id) {
-          fetch(`/api/reviews?productId=${p.id}`, { cache: "no-store" }).then(r=>r.json()).then(d=>setReviews(d.reviews ?? []));
+          fetch(`/api/reviews?productId=${p.id}`, { cache: "no-store" })
+            .then(r => r.json())
+            .then(d => {
+              setReviews(d.reviews ?? []);
+              setRevAvg(d.avgRating ?? 5.0);
+              setRevTotal(d.total ?? 0);
+              setRevBreakdown(d.breakdown ?? { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 });
+            });
         }
       });
     fetch("/api/products?limit=4", { cache: "no-store" })
@@ -371,27 +391,291 @@ export default function ProductViewPage() {
           </div>
         </div>
 
-        {/* Reviews */}
-        <div className="mt-20">
-          <h2 className="font-display font-bold text-2xl text-neutral-900 dark:text-white mb-8">Customer Reviews {reviews.length > 0 && <span className="text-neutral-400 font-normal text-base">({reviews.length})</span>}</h2>
-          {reviews.length === 0 ? (
-            <p className="text-neutral-400 text-sm">No reviews yet — be the first to review this product!</p>
-          ) : (
-            <div className="grid md:grid-cols-3 gap-6">
-              {reviews.map(r => (
-                <div key={r.id} className="bg-neutral-50 dark:bg-neutral-900 rounded-2xl p-6">
-                  <div className="flex items-center gap-1 mb-3">{[1,2,3,4,5].map(s => <Star key={s} size={12} fill={s<=r.rating?"#d4a017":"none"} color={s<=r.rating?"#d4a017":"#d4d4d4"} strokeWidth={1.5}/>)}</div>
-                  {r.title && <p className="font-semibold text-sm text-neutral-900 dark:text-white mb-1.5">{r.title}</p>}
-                  <p className="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed mb-4">{r.comment}</p>
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs font-semibold text-neutral-900 dark:text-white">{r.first_name} {r.last_name?.[0]}.</p>
-                    <p className="text-[10px] text-neutral-400">{timeAgo(r.created_at)}</p>
+        {/* Customer Reviews & Ratings Section */}
+        <div className="mt-20 border-t border-neutral-200 dark:border-neutral-800 pt-14">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+            <div>
+              <h2 className="font-sans font-extrabold text-2xl md:text-3xl text-neutral-900 dark:text-white tracking-tight flex items-center gap-3">
+                Customer Reviews
+                <span className="text-sm font-bold text-neutral-500 bg-neutral-100 dark:bg-neutral-800 px-3 py-1 rounded-full">
+                  {revTotal} {revTotal === 1 ? "Review" : "Reviews"}
+                </span>
+              </h2>
+              <p className="text-xs text-neutral-500 mt-1">Real ratings and verified feedback from verified buyers.</p>
+            </div>
+
+            <button
+              onClick={() => setShowWriteModal(true)}
+              className="px-6 py-3 bg-[#e02020] hover:bg-[#c01a1a] text-white font-bold text-xs uppercase tracking-wider rounded-2xl transition-all shadow-md shadow-[#e02020]/20 flex items-center justify-center gap-2"
+            >
+              <Star size={15} className="fill-current" /> Write a Review
+            </button>
+          </div>
+
+          {/* Rating Breakdown & Overall Score Bar */}
+          <div className="bg-neutral-50 dark:bg-neutral-900 border border-neutral-200/80 dark:border-neutral-800 rounded-3xl p-6 md:p-8 mb-10 grid md:grid-cols-3 gap-8 items-center">
+            {/* Big Rating Number */}
+            <div className="text-center md:text-left space-y-2 md:border-r border-neutral-200 dark:border-neutral-800 md:pr-8">
+              <span className="font-sans font-black text-5xl md:text-6xl text-neutral-900 dark:text-white tracking-tight">
+                {revAvg.toFixed(1)}
+              </span>
+              <div className="flex justify-center md:justify-start text-amber-400 gap-1 my-1">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <Star
+                    key={s}
+                    size={20}
+                    className={s <= Math.round(revAvg) ? "fill-amber-400 text-amber-400" : "text-neutral-300 dark:text-neutral-700"}
+                  />
+                ))}
+              </div>
+              <p className="text-xs font-semibold text-neutral-500">Based on {revTotal} verified buyer review(s)</p>
+            </div>
+
+            {/* 5-Star Progress Bars */}
+            <div className="md:col-span-2 space-y-2">
+              {[5, 4, 3, 2, 1].map((stars) => {
+                const count = (revBreakdown as any)[stars] || 0;
+                const pct = revTotal > 0 ? (count / revTotal) * 100 : 0;
+                return (
+                  <div key={stars} className="flex items-center gap-3 text-xs">
+                    <span className="w-12 font-bold text-neutral-700 dark:text-neutral-300 flex items-center gap-1">
+                      {stars} <Star size={12} className="fill-amber-400 text-amber-400 inline" />
+                    </span>
+                    <div className="flex-1 h-2.5 bg-neutral-200 dark:bg-neutral-800 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-amber-400 transition-all duration-500"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    <span className="w-10 text-right font-medium text-neutral-400">{count}</span>
                   </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* List of Customer Reviews */}
+          {reviews.length === 0 ? (
+            <div className="text-center py-12 bg-white dark:bg-neutral-900 border border-neutral-200/80 dark:border-neutral-800 rounded-3xl p-8 space-y-3">
+              <Star size={36} className="mx-auto text-neutral-300 dark:text-neutral-700" />
+              <p className="text-sm font-semibold text-neutral-600 dark:text-neutral-300">No approved reviews yet for this product</p>
+              <button
+                onClick={() => setShowWriteModal(true)}
+                className="text-xs font-bold text-[#e02020] hover:underline inline-block"
+              >
+                Be the first to leave a review &rarr;
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {reviews.map((r: any) => (
+                <div
+                  key={r.id}
+                  className="bg-white dark:bg-neutral-900 border border-neutral-200/80 dark:border-neutral-800 rounded-3xl p-6 md:p-8 space-y-4 shadow-sm"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 flex items-center justify-center font-bold text-neutral-800 dark:text-neutral-200 text-sm">
+                        {(r.customer_name || "A").charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-sm text-neutral-900 dark:text-white flex items-center gap-2 flex-wrap">
+                          {r.customer_name || "Verified Buyer"}
+                          {r.country && (
+                            <span className="text-xs font-medium text-neutral-600 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800 px-2 py-0.5 rounded-md border border-neutral-200 dark:border-neutral-700">
+                              {r.country}
+                            </span>
+                          )}
+                          <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800">
+                            Verified Purchase
+                          </span>
+                        </h4>
+                        <p className="text-[11px] text-neutral-400 mt-0.5">
+                          {r.created_at ? timeAgo(r.created_at) : "Recently"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Star Rating */}
+                    <div className="flex text-amber-400 gap-0.5">
+                      {Array.from({ length: 5 }).map((_, idx) => (
+                        <Star
+                          key={idx}
+                          size={14}
+                          className={idx < r.rating ? "fill-amber-400 text-amber-400" : "text-neutral-200 dark:text-neutral-800"}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    {r.title && <h5 className="font-bold text-sm text-neutral-900 dark:text-white">{r.title}</h5>}
+                    <p className="text-xs text-neutral-600 dark:text-neutral-300 leading-relaxed">{r.comment}</p>
+                  </div>
+
+                  {/* Official Store Admin Reply */}
+                  {r.admin_reply && (
+                    <div className="mt-4 p-4 bg-neutral-50 dark:bg-neutral-800/60 border-l-4 border-[#e02020] rounded-r-2xl space-y-1">
+                      <p className="text-xs font-bold text-neutral-900 dark:text-white flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-[#e02020]" /> Response from Store Manager
+                      </p>
+                      <p className="text-xs text-neutral-500 leading-relaxed">{r.admin_reply}</p>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
           )}
         </div>
+
+        {/* Customer Write Review Modal */}
+        {showWriteModal && (
+          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-3xl p-6 md:p-8 max-w-lg w-full space-y-5 shadow-2xl animate-[scaleIn_.2s_ease-out]">
+              <div className="flex items-center justify-between border-b border-neutral-100 dark:border-neutral-800 pb-4">
+                <h3 className="font-sans font-bold text-lg text-neutral-900 dark:text-white flex items-center gap-2">
+                  <Star className="text-amber-400 fill-amber-400" size={20} /> Write a Review
+                </h3>
+                <button
+                  onClick={() => setShowWriteModal(false)}
+                  className="text-neutral-400 hover:text-neutral-900 dark:hover:text-white font-bold text-lg"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  if (!revComment.trim()) {
+                    toast.error("Please enter your review comments.");
+                    return;
+                  }
+                  setSubmittingRev(true);
+                  try {
+                    const res = await fetch("/api/reviews", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        productId: product.id,
+                        rating: revRating,
+                        title: revTitle,
+                        comment: revComment,
+                        customerName: revName,
+                        customerEmail: revEmail,
+                      }),
+                    });
+                    const d = await res.json();
+                    if (res.ok) {
+                      toast.success("Review Submitted!", {
+                        description: "Thank you for your feedback. Your review will be published after quick admin approval.",
+                      });
+                      setShowWriteModal(false);
+                      setRevTitle("");
+                      setRevComment("");
+                    } else {
+                      toast.error("Could not submit review", { description: d.error || "Please try again." });
+                    }
+                  } catch {
+                    toast.error("Failed to submit review");
+                  } finally {
+                    setSubmittingRev(false);
+                  }
+                }}
+                className="space-y-4"
+              >
+                {/* Rating Picker */}
+                <div>
+                  <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider block mb-2">Overall Rating *</label>
+                  <div className="flex items-center gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setRevRating(star)}
+                        className="p-1 text-amber-400 transition-transform hover:scale-125"
+                      >
+                        <Star
+                          size={28}
+                          className={star <= revRating ? "fill-amber-400 text-amber-400" : "text-neutral-300 dark:text-neutral-700"}
+                        />
+                      </button>
+                    ))}
+                    <span className="text-xs font-bold text-neutral-700 dark:text-neutral-300 ml-2">
+                      {revRating}.0 / 5.0
+                    </span>
+                  </div>
+                </div>
+
+                {/* Name & Email */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider block mb-1">Your Name</label>
+                    <input
+                      type="text"
+                      value={revName}
+                      onChange={(e) => setRevName(e.target.value)}
+                      placeholder="e.g. Sarah Jenkins"
+                      className="w-full px-3.5 py-2.5 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-xs focus:outline-none focus:border-[#e02020]"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider block mb-1">Your Email</label>
+                    <input
+                      type="email"
+                      value={revEmail}
+                      onChange={(e) => setRevEmail(e.target.value)}
+                      placeholder="sarah@example.com"
+                      className="w-full px-3.5 py-2.5 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-xs focus:outline-none focus:border-[#e02020]"
+                    />
+                  </div>
+                </div>
+
+                {/* Headline */}
+                <div>
+                  <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider block mb-1">Review Title</label>
+                  <input
+                    type="text"
+                    value={revTitle}
+                    onChange={(e) => setRevTitle(e.target.value)}
+                    placeholder="e.g. Excellent fit and supreme fabric quality!"
+                    className="w-full px-3.5 py-2.5 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-xs focus:outline-none focus:border-[#e02020]"
+                  />
+                </div>
+
+                {/* Comment */}
+                <div>
+                  <label className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider block mb-1">Your Review *</label>
+                  <textarea
+                    required
+                    value={revComment}
+                    onChange={(e) => setRevComment(e.target.value)}
+                    placeholder="Tell us what you liked or disliked about this product..."
+                    rows={4}
+                    className="w-full px-3.5 py-2.5 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-xs focus:outline-none focus:border-[#e02020]"
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="submit"
+                    disabled={submittingRev}
+                    className="flex-1 py-3.5 bg-[#e02020] hover:bg-[#c01a1a] text-white font-bold rounded-2xl text-xs transition-colors shadow-md shadow-[#e02020]/20 disabled:opacity-60"
+                  >
+                    {submittingRev ? "Submitting Review..." : "Submit Review for Approval"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowWriteModal(false)}
+                    className="px-6 py-3.5 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 font-bold rounded-2xl text-xs hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
 
         {/* Related */}
         {related.length > 0 && (

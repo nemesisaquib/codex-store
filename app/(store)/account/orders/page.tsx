@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Package, ArrowRight, Search } from "lucide-react";
+import { Package, ArrowRight, Search, Truck } from "lucide-react";
 
 interface Order { id:string; order_number:string; total:number; status:string; created_at:string; items:string }
 
@@ -72,11 +72,19 @@ export default function OrdersPage() {
                   ))}
                 </div>
                 <p className="text-xs text-neutral-400 mb-3">{items.map(i=>i.name).join(" · ")}</p>
-                <div className="flex items-center justify-between pt-3 border-t border-neutral-100 dark:border-neutral-800">
+                <div className="flex items-center justify-between pt-3 border-t border-neutral-100 dark:border-neutral-800 flex-wrap gap-2">
                   <p className="font-bold text-neutral-900 dark:text-white">${o.total}</p>
-                  <Link href={`/account/orders/${o.order_number}`} className="flex items-center gap-1.5 text-xs font-medium text-[#e02020] hover:underline">
-                    View details <ArrowRight size={12}/>
-                  </Link>
+                  <div className="flex items-center gap-3">
+                    <Link
+                      href={`/track?order=${encodeURIComponent(o.order_number)}`}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#e02020]/10 hover:bg-[#e02020] text-[#e02020] hover:text-white text-xs font-bold rounded-xl transition-all"
+                    >
+                      <Truck size={13} /> Track Order
+                    </Link>
+                    <Link href={`/account/orders/${o.order_number}`} className="flex items-center gap-1.5 text-xs font-medium text-neutral-600 dark:text-neutral-300 hover:text-[#e02020]">
+                      View details <ArrowRight size={12}/>
+                    </Link>
+                  </div>
                 </div>
               </div>
             );

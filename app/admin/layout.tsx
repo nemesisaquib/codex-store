@@ -6,7 +6,7 @@ import {
   LayoutDashboard, Package, ShoppingCart, Users, BarChart3,
   Settings, Bell, LogOut, Search, Tag, Globe, Shield,
   Warehouse, Mail, ChevronDown, ChevronRight, Store,
-  X, Menu, AlertTriangle, UserPlus, Check, MapPin, FolderTree, Bookmark, FileText, Image as ImageIcon
+  X, Menu, AlertTriangle, UserPlus, Check, MapPin, FolderTree, Bookmark, FileText, Image as ImageIcon, Star
 } from "lucide-react";
 import { useSettings } from "@/lib/SettingsContext";
 
@@ -30,6 +30,7 @@ const NAV = [
   { href:"/admin",             icon:LayoutDashboard, label:"Dashboard",   badge:null },
   { href:"/admin/orders",      icon:ShoppingCart,    label:"Orders",      badge:"3"  },
   { href:"/admin/products",    icon:Package,         label:"Products",    badge:null },
+  { href:"/admin/reviews",     icon:Star,           label:"Product Reviews", badge:"New" },
   { href:"/admin/groceries",   icon:Store,           label:"Fresh Groceries", badge:"Fresh" },
   { href:"/admin/categories",  icon:FolderTree,      label:"Categories",  badge:null },
   { href:"/admin/brands",      icon:Bookmark,        label:"Brands",      badge:null },

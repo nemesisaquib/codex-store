@@ -53,16 +53,32 @@ export default function OrderDetailPage() {
             <h1 className="font-display font-bold text-xl text-neutral-900 dark:text-white">{order.order_number}</h1>
             <p className="text-sm text-neutral-400 mt-1">Placed {new Date(order.created_at).toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"})}</p>
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 border border-neutral-200 dark:border-neutral-700 rounded-xl text-sm font-medium hover:border-[#e02020] transition-colors">
-            <Download size={14}/> Invoice
-          </button>
+          <div className="flex items-center gap-3">
+            <Link
+              href={`/track?order=${encodeURIComponent(order.order_number)}`}
+              className="flex items-center gap-2 px-4 py-2 bg-[#e02020] hover:bg-[#c01a1a] text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-[#e02020]/20"
+            >
+              <Truck size={14} /> Track Order Live
+            </Link>
+            <button className="flex items-center gap-2 px-4 py-2 border border-neutral-200 dark:border-neutral-700 rounded-xl text-xs font-medium hover:border-[#e02020] transition-colors">
+              <Download size={14}/> Invoice
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Timeline */}
       {order.status !== "returned" && order.status !== "refunded" && (
         <div className="bg-white dark:bg-neutral-900 rounded-2xl p-6">
-          <h2 className="font-semibold text-neutral-900 dark:text-white mb-6 text-sm">Order Status</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="font-semibold text-neutral-900 dark:text-white text-sm">Order Status</h2>
+            <Link
+              href={`/track?order=${encodeURIComponent(order.order_number)}`}
+              className="text-xs font-bold text-[#e02020] hover:underline flex items-center gap-1"
+            >
+              Live Logistics View &rarr;
+            </Link>
+          </div>
           <div className="flex items-center justify-between relative">
             <div className="absolute top-3 left-0 right-0 h-0.5 bg-neutral-100 dark:bg-neutral-800"/>
             <div className="absolute top-3 left-0 h-0.5 bg-[#e02020] transition-all" style={{width:`${(Math.max(0,currentStep-1)/(TIMELINE.length-1))*100}%`}}/>
@@ -77,10 +93,18 @@ export default function OrderDetailPage() {
             })}
           </div>
           {order.tracking_number && (
-            <div className="mt-6 flex items-center gap-2 p-3 bg-neutral-50 dark:bg-neutral-800 rounded-xl">
-              <Truck size={15} className="text-[#e02020]"/>
-              <span className="text-xs text-neutral-500">Tracking:</span>
-              <span className="text-xs font-mono-brand font-bold text-neutral-900 dark:text-white">{order.tracking_number}</span>
+            <div className="mt-6 flex items-center justify-between p-3 bg-neutral-50 dark:bg-neutral-800 rounded-xl flex-wrap gap-2">
+              <div className="flex items-center gap-2">
+                <Truck size={15} className="text-[#e02020]"/>
+                <span className="text-xs text-neutral-500">Tracking:</span>
+                <span className="text-xs font-mono-brand font-bold text-neutral-900 dark:text-white">{order.tracking_number}</span>
+              </div>
+              <Link
+                href={`/track?tracking=${encodeURIComponent(order.tracking_number)}`}
+                className="text-xs font-bold text-[#e02020] hover:underline"
+              >
+                Track carrier &rarr;
+              </Link>
             </div>
           )}
         </div>

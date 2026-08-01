@@ -1,8 +1,10 @@
 "use client";
+
+// Next.js Track Order Component - Updated Version
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Search, Truck, Package, CheckCircle2, Clock, MapPin, ArrowRight, ShieldCheck, RefreshCw, AlertCircle } from "lucide-react";
+import { Search, Truck, CheckCircle2, MapPin, ArrowRight, RefreshCw, AlertCircle } from "lucide-react";
 
 interface TrackingEvent {
   status: string;
@@ -68,19 +70,19 @@ function TrackOrderContent() {
         
         {/* Header Banner */}
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-xs font-bold uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#e02020]/10 text-[#e02020] border border-[#e02020]/20 text-xs font-bold uppercase tracking-wider">
             <Truck size={14} /> Live Carrier Logistics Tracker
           </div>
           <h1 className="font-display font-black text-3xl md:text-4xl text-neutral-900 dark:text-white">
             Track Your Order
           </h1>
           <p className="text-sm text-neutral-500 max-w-md mx-auto">
-            Enter your Order Number (e.g. <span className="font-mono font-bold text-neutral-700 dark:text-neutral-300">COD-2026-42483</span>) or Tracking Number to view real-time parcel updates.
+            Enter your Order Number (e.g. <span className="font-mono font-bold text-neutral-700 dark:text-neutral-300">COD-2026-84920</span>) or Tracking Number to view real-time parcel updates.
           </p>
         </div>
 
         {/* Search Input Card */}
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-3xl p-4 md:p-6 shadow-sm">
+        <div className="bg-white dark:bg-neutral-900 border border-neutral-200/80 dark:border-neutral-800 rounded-3xl p-4 md:p-6 shadow-sm">
           <form
             onSubmit={e => {
               e.preventDefault();
@@ -118,7 +120,7 @@ function TrackOrderContent() {
         {data && (
           <div className="space-y-6 animate-[fadeIn_.3s_ease-out]">
             {/* Top Summary Bar */}
-            <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-3xl p-6 shadow-sm space-y-6">
+            <div className="bg-white dark:bg-neutral-900 border border-neutral-200/80 dark:border-neutral-800 rounded-3xl p-6 shadow-sm space-y-6">
               <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-neutral-100 dark:border-neutral-800">
                 <div>
                   <span className="text-[10px] font-extrabold tracking-widest text-neutral-400 uppercase">Order Number</span>
@@ -138,16 +140,16 @@ function TrackOrderContent() {
                 </div>
                 <div>
                   <span className="text-[10px] font-extrabold tracking-widest text-neutral-400 uppercase">Estimated Delivery</span>
-                  <p className="font-bold text-sm text-emerald-600 dark:text-emerald-400 mt-0.5">
+                  <p className="font-bold text-sm text-[#e02020] dark:text-[#ff4d4d] mt-0.5">
                     {data.estimated_delivery}
                   </p>
                 </div>
               </div>
 
-              {/* Step Progress Bar */}
+              {/* Step Progress Bar - Pure Brand Red */}
               <div>
                 <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-4 block">Fulfillment Progress</span>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-4 gap-3">
                   {[
                     { key: "pending", label: "Ordered" },
                     { key: "processing", label: "Packed" },
@@ -157,8 +159,14 @@ function TrackOrderContent() {
                     const isDone = idx <= (currentStepIdx >= 0 ? currentStepIdx : 1);
                     return (
                       <div key={s.key} className="space-y-2">
-                        <div className={`h-2 rounded-full transition-all duration-500 ${isDone ? "bg-gradient-to-r from-[#e02020] to-emerald-500" : "bg-neutral-100 dark:bg-neutral-800"}`} />
-                        <p className={`text-[11px] font-bold text-center ${isDone ? "text-neutral-900 dark:text-white" : "text-neutral-400"}`}>
+                        <div
+                          className={`h-2.5 rounded-full transition-all duration-300 ${
+                            isDone
+                              ? "bg-[#e02020]"
+                              : "bg-neutral-100 dark:bg-neutral-800"
+                          }`}
+                        />
+                        <p className={`text-[11px] font-bold text-center ${isDone ? "text-[#e02020] dark:text-white" : "text-neutral-400"}`}>
                           {s.label}
                         </p>
                       </div>
@@ -168,32 +176,41 @@ function TrackOrderContent() {
               </div>
             </div>
 
-            {/* Real-time Timeline Events */}
-            <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-3xl p-6 shadow-sm space-y-4">
-              <h3 className="font-bold text-sm text-neutral-900 dark:text-white uppercase tracking-wider mb-2">
+            {/* Real-time Timeline Events - Guaranteed Flexbox Spacing */}
+            <div className="bg-white dark:bg-neutral-900 border border-neutral-200/80 dark:border-neutral-800 rounded-3xl p-6 md:p-8 shadow-sm space-y-6">
+              <h3 className="font-bold text-sm text-neutral-900 dark:text-white uppercase tracking-wider border-b border-neutral-100 dark:border-neutral-800 pb-3">
                 Live Checkpoint Updates ({data.events.length})
               </h3>
 
-              <div className="relative pl-6 space-y-6 before:absolute before:left-3 before:top-3 before:bottom-3 before:w-0.5 before:bg-neutral-200 dark:before:bg-neutral-800">
+              {/* Flexbox Container with inline styling for 100% forced layout */}
+              <div className="relative space-y-6 before:absolute before:left-[15px] before:top-4 before:bottom-4 before:w-0.5 before:bg-neutral-200 dark:before:bg-neutral-800">
                 {data.events.map((ev, i) => (
-                  <div key={i} className="relative flex items-start gap-4 group">
-                    {/* Circle Node */}
-                    <div className={`absolute -left-6 top-0.5 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all ${ev.done ? "bg-emerald-500 text-white border-emerald-500 shadow-sm shadow-emerald-200" : "bg-white dark:bg-neutral-900 text-neutral-400 border-neutral-300 dark:border-neutral-700"}`}>
-                      {ev.done ? <CheckCircle2 size={13} /> : i + 1}
+                  <div key={i} className="flex items-start gap-4 relative z-10" style={{ gap: "1rem" }}>
+                    {/* Circle Node Badge */}
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 flex-shrink-0 transition-all ${
+                        ev.done
+                          ? "bg-[#e02020] text-white border-[#e02020] shadow-sm"
+                          : "bg-white dark:bg-neutral-900 text-neutral-400 border-neutral-300 dark:border-neutral-700"
+                      }`}
+                      style={{ flexShrink: 0 }}
+                    >
+                      {ev.done ? <CheckCircle2 size={15} /> : i + 1}
                     </div>
 
-                    <div className="flex-1 min-w-0">
+                    {/* Event Description Card */}
+                    <div className="flex-1 bg-neutral-50/70 dark:bg-neutral-800/40 p-4 rounded-2xl border border-neutral-200/60 dark:border-neutral-800 space-y-1.5" style={{ flex: 1 }}>
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <p className={`text-sm font-bold ${ev.done ? "text-neutral-900 dark:text-white" : "text-neutral-500"}`}>
                           {ev.status}
                         </p>
-                        <span className="text-[11px] font-semibold text-neutral-400 bg-neutral-100 dark:bg-neutral-800 px-2 py-0.5 rounded">
+                        <span className="text-[11px] font-semibold text-neutral-500 dark:text-neutral-400 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 px-2.5 py-0.5 rounded-md">
                           {ev.time}
                         </span>
                       </div>
-                      <p className="text-xs text-neutral-500 mt-1">{ev.desc}</p>
-                      <p className="text-[10px] font-medium text-neutral-400 flex items-center gap-1 mt-1">
-                        <MapPin size={11} className="text-[#e02020]" /> {ev.location}
+                      <p className="text-xs text-neutral-500 leading-relaxed">{ev.desc}</p>
+                      <p className="text-[11px] font-semibold text-neutral-400 flex items-center gap-1.5 pt-1">
+                        <MapPin size={12} className="text-[#e02020]" /> {ev.location}
                       </p>
                     </div>
                   </div>
@@ -202,8 +219,11 @@ function TrackOrderContent() {
             </div>
 
             {/* Back Home */}
-            <div className="text-center pt-4">
-              <Link href="/" className="inline-flex items-center gap-2 px-8 py-3 bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 font-bold rounded-2xl text-xs hover:bg-[#e02020] dark:hover:bg-[#e02020] dark:hover:text-white transition-colors">
+            <div className="text-center pt-2">
+              <Link
+                href="/"
+                className="inline-flex items-center gap-2 px-8 py-3 bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 font-bold rounded-2xl text-xs hover:bg-[#e02020] dark:hover:bg-[#e02020] dark:hover:text-white transition-colors"
+              >
                 Back to Shopping <ArrowRight size={14} />
               </Link>
             </div>

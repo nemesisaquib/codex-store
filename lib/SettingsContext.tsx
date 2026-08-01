@@ -79,10 +79,17 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+const defaultContext: SettingsContextType = {
+  settings: {
+    store_name: "E-shop",
+    currency: "EUR",
+  },
+  loading: false,
+  formatPrice: (price: number) => `$${Number(price || 0).toFixed(2)}`,
+  refreshSettings: async () => {},
+};
+
 export function useSettings() {
   const context = useContext(SettingsContext);
-  if (context === undefined) {
-    throw new Error("useSettings must be used within a SettingsProvider");
-  }
-  return context;
+  return context || defaultContext;
 }

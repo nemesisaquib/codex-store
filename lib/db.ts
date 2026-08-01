@@ -86,22 +86,180 @@ export function getDb(): Client {
         )
       `);
 
-      // Create grocery_items table
+      // Create orders table
       await _db!.execute(`
-        CREATE TABLE IF NOT EXISTS grocery_items (
+        CREATE TABLE IF NOT EXISTS orders (
           id TEXT PRIMARY KEY,
-          name TEXT NOT NULL,
-          slug TEXT UNIQUE NOT NULL,
-          price REAL NOT NULL,
-          compare_price REAL DEFAULT NULL,
-          unit TEXT DEFAULT 'per pack',
-          freshness_badge TEXT DEFAULT 'Farm Fresh',
-          image_url TEXT DEFAULT NULL,
-          stock INTEGER DEFAULT 100,
-          is_active INTEGER DEFAULT 1,
+          order_number TEXT UNIQUE NOT NULL,
+          customer_name TEXT NOT NULL,
+          customer_email TEXT NOT NULL,
+          status TEXT DEFAULT 'pending',
+          payment_status TEXT DEFAULT 'pending',
+          subtotal REAL DEFAULT 0,
+          shipping REAL DEFAULT 0,
+          tax REAL DEFAULT 0,
+          discount REAL DEFAULT 0,
+          total REAL DEFAULT 0,
+          items TEXT,
+          shipping_address TEXT,
+          shipping_method TEXT DEFAULT 'standard',
+          tracking_number TEXT,
+          notes TEXT,
           created_at TEXT DEFAULT CURRENT_TIMESTAMP
         )
       `);
+
+      // Seed default sample orders if empty
+      try {
+        const orderCheck = await _db!.execute("SELECT COUNT(*) as c FROM orders");
+        if ((orderCheck.rows[0] as any).c === 0) {
+          const sampleOrders = [
+            {
+              id: "ord_demo_1",
+              order_number: "COD-2026-84920",
+              customer_name: "Sarah Jenkins",
+              customer_email: "sarah.j@example.com",
+              status: "shipped",
+              payment_status: "paid",
+              subtotal: 185.00,
+              shipping: 12.99,
+              tax: 15.00,
+              total: 212.99,
+              items: JSON.stringify([{ name: "Classic Leather Jacket", quantity: 1, price: 185.00 }]),
+              shipping_address: "742 Evergreen Terrace, Springfield, OR 97477",
+              shipping_method: "DHL Express",
+              tracking_number: "TRK-849201948"
+            },
+            {
+              id: "ord_demo_2",
+              order_number: "COD-2026-91042",
+              customer_name: "Alexander Wright",
+              customer_email: "alex.wright@example.com",
+              status: "processing",
+              payment_status: "paid",
+              subtotal: 120.00,
+              shipping: 0.00,
+              tax: 10.20,
+              total: 130.20,
+              items: JSON.stringify([{ name: "Minimalist Chronograph Watch", quantity: 1, price: 120.00 }]),
+              shipping_address: "100 Market St, San Francisco, CA 94105",
+              shipping_method: "Standard Shipping",
+              tracking_number: "TRK-910425510"
+            },
+            {
+              id: "ord_demo_3",
+              order_number: "COD-2026-10492",
+              customer_name: "Emily Watson",
+              customer_email: "emily.w@example.com",
+              status: "delivered",
+              payment_status: "paid",
+              subtotal: 95.00,
+              shipping: 5.00,
+              tax: 8.00,
+              total: 108.00,
+              items: JSON.stringify([{ name: "Designer Leather Tote Bag", quantity: 1, price: 95.00 }]),
+              shipping_address: "500 5th Ave, New York, NY 10110",
+              shipping_method: "FedEx Ground",
+              tracking_number: "TRK-104928841"
+            }
+          ];
+
+          for (const o of sampleOrders) {
+            await _db!.execute({
+              sql: "INSERT INTO orders (id, order_number, customer_name, customer_email, status, payment_status, subtotal, shipping, tax, total, items, shipping_address, shipping_method, tracking_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+              args: [o.id, o.order_number, o.customer_name, o.customer_email, o.status, o.payment_status, o.subtotal, o.shipping, o.tax, o.total, o.items, o.shipping_address, o.shipping_method, o.tracking_number]
+            });
+          }
+        }
+      } catch (e) {}
+
+      // Create reviews table
+      await _db!.execute(`
+        CREATE TABLE IF NOT EXISTS reviews (
+          id TEXT PRIMARY KEY,
+          product_id TEXT NOT NULL,
+          customer_id TEXT DEFAULT 'cust_admin',
+          customer_name TEXT DEFAULT 'Verified Buyer',
+          customer_email TEXT,
+          country TEXT,
+          rating INTEGER NOT NULL DEFAULT 5,
+          title TEXT,
+          comment TEXT NOT NULL,
+          status TEXT DEFAULT 'approved',
+          admin_reply TEXT
+        )
+      `);
+      // Migration for reviews table columns
+      try { await _db!.execute("ALTER TABLE reviews ADD COLUMN customer_id TEXT DEFAULT 'cust_admin'"); } catch (e) {}
+      try { await _db!.execute("ALTER TABLE reviews ADD COLUMN customer_name TEXT DEFAULT 'Verified Buyer'"); } catch (e) {}
+      try { await _db!.execute("ALTER TABLE reviews ADD COLUMN customer_email TEXT DEFAULT NULL"); } catch (e) {}
+      try { await _db!.execute("ALTER TABLE reviews ADD COLUMN country TEXT DEFAULT NULL"); } catch (e) {}
+      try { await _db!.execute("ALTER TABLE reviews ADD COLUMN title TEXT DEFAULT NULL"); } catch (e) {}
+      try { await _db!.execute("ALTER TABLE reviews ADD COLUMN admin_reply TEXT DEFAULT NULL"); } catch (e) {}
+
+      // Seed sample reviews if empty
+      try {
+        const revCheck = await _db!.execute("SELECT COUNT(*) as c FROM reviews");
+        if ((revCheck.rows[0] as any).c === 0) {
+          const sampleReviews = [
+            {
+              id: "rev_1",
+              product_id: "p1",
+              customer_name: "Eleanor Vance",
+              customer_email: "eleanor@example.com",
+              rating: 5,
+              title: "Absolute perfection!",
+              comment: "The leather quality is top tier. Fits like a glove and feels incredibly luxurious. Highly recommend!",
+              status: "approved",
+              admin_reply: "Thank you Eleanor! We take great pride in our leather craftsmanship.",
+              created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
+            },
+            {
+              id: "rev_2",
+              product_id: "p1",
+              customer_name: "Marcus Brody",
+              customer_email: "marcus@example.com",
+              rating: 4,
+              title: "Great quality, fast shipping",
+              comment: "Arrived in 2 days via DHL. Great finish and heavy duty zippers. Slightly snug around the shoulders.",
+              status: "approved",
+              admin_reply: null,
+              created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+            },
+            {
+              id: "rev_3",
+              product_id: "p2",
+              customer_name: "Sophia Martinez",
+              customer_email: "sophia@example.com",
+              rating: 5,
+              title: "Stunning timepiece!",
+              comment: "Looks way more expensive than it is. The minimal dial and strap get compliments everywhere I go.",
+              status: "approved",
+              admin_reply: null,
+              created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
+            },
+            {
+              id: "rev_4",
+              product_id: "p3",
+              customer_name: "David Kim",
+              customer_email: "david.k@example.com",
+              rating: 5,
+              title: "Worth every penny",
+              comment: "Extremely spacious tote bag with durable stitching. Fits my 15-inch laptop and daily essentials easily.",
+              status: "pending",
+              admin_reply: null,
+              created_at: new Date().toISOString()
+            }
+          ];
+
+          for (const r of sampleReviews) {
+            await _db!.execute({
+              sql: "INSERT INTO reviews (id, product_id, customer_name, customer_email, rating, title, comment, status, admin_reply, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+              args: [r.id, r.product_id, r.customer_name, r.customer_email, r.rating, r.title, r.comment, r.status, r.admin_reply, r.created_at]
+            });
+          }
+        }
+      } catch (e) {}
 
       // Seed default fresh grocery items if table is empty
       try {
@@ -142,9 +300,11 @@ export function getDb(): Client {
         "subcategory_id TEXT",
         "brand_id TEXT"
       ];
-      cols.forEach(async (col) => {
-        try { await _db!.execute(`ALTER TABLE products ADD COLUMN ${col}`); } catch(e) {}
-      });
+      for (const col of cols) {
+        try {
+          await _db!.execute(`ALTER TABLE products ADD COLUMN ${col}`);
+        } catch (e) {}
+      }
 
       // Seed default categories if table is empty
       const catCheck = await _db!.execute("SELECT COUNT(*) as c FROM categories");

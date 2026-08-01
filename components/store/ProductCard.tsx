@@ -138,6 +138,7 @@ export default function ProductCard({ product }: { product: Product }) {
                 const res = await fetch("/api/cart", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items: cart }) });
                 if (res.ok) {
                   toast.success("Added to bag", { description: `${product.name} — ${formatPrice(product.price)}` });
+                  window.dispatchEvent(new Event("cart-updated"));
                 } else if (res.status === 401) {
                   toast.error("Please sign in", { description: "Log in to add items to your bag." });
                 }

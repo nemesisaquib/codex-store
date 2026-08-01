@@ -320,9 +320,7 @@ export default function Navbar() {
     transition: "top 0.2s ease, box-shadow 0.2s ease"
   };
 
-  useEffect(() => {
-    fetch("/api/cart").then(r => r.json()).then(d => setCartCount(d.items?.length ?? 0));
-  }, []);
+
 
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
@@ -521,10 +519,12 @@ export default function Navbar() {
                 className={`cursor-pointer relative flex items-center gap-1.5 px-3 py-2 rounded-full bg-[#e02020] hover:bg-[#c01a1a] text-white transition-all duration-200 ml-2 shadow-md shadow-[#e02020]/30 ${cartOpen ? "opacity-0 pointer-events-none" : "opacity-100"}`}
               >
                 <Icon.Bag />
-                <span className="font-semibold text-sm hidden sm:block">Cart</span>
+                <span className="font-semibold text-sm hidden sm:block">
+                  Cart {cartCount > 0 ? `(${cartCount})` : ""}
+                </span>
                 {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[20px] h-[20px] px-1 bg-neutral-900 text-white text-[11px] font-black rounded-full flex items-center justify-center leading-none border-2 border-white dark:border-neutral-950">
-                    {cartCount > 9 ? "9+" : cartCount}
+                  <span className="absolute -top-1.5 -right-1.5 min-w-[22px] h-[22px] px-1.5 bg-neutral-900 text-white text-[11px] font-black rounded-full flex items-center justify-center leading-none border-2 border-white dark:border-neutral-950 shadow-md animate-[scaleIn_.2s_ease-out]">
+                    {cartCount > 99 ? "99+" : cartCount}
                   </span>
                 )}
               </button>
